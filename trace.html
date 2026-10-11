@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracé GPX</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    html, body, #map { height: 100%; margin: 0; }
+    #info {
+      position: absolute; z-index: 1000; top: 8px; left: 52px;
+      background: #fff; padding: 6px 10px; border-radius: 6px;
+      font: 14px sans-serif; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+    }
+  </style>
+</head>
+<body>
+  <div id="info">Chargement…</div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    var API = 'https://script.google.com/macros/s/AKfycbyptX2-OXsxh8yXqk9Hi_ygvcxP1_4vD0AT-KzZPcTFzR9AfEKHbQnBvgi3Pvw5a-LL/exec';
+    var info = document.getElementById('info');
+    var map = L.map('map').setView([46.6, 2.5], 5);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    function draw(txt) {
+      var xml = new DOMParser().parseFromString(txt, 'text/xml');
+      var pts = [].slice.call(xml.getElementsByTagName('trkpt'));
+      if (!pts.length) pts = [].slice.call(xml.getElementsByTagName('rtept'));
+      if (!pts.length) { info.textContent = 'Aucun point dans ce GPX'; return; }
+
+      var ll = [], km = 0, dplus = 0, lastEle = null;
+      pts.forEach(function (p, i) {
+        ll.push([+p.getAttribute('lat'), +p.getAttribute('lon')]);
+        if (i > 0) km += map.distance(ll[i - 1], ll[i]) / 1000;
+        var e = p.getElementsByTagName('ele')[0];
+        if (e) {
+          var ele = +e.textContent;
+          if (lastEle !== null && ele > lastEle) dplus += ele - lastEle;
+          lastEle = ele;
+        }
+      });
+
+      var line = L.polyline(ll, { color: '#d9480f', weight: 4 }).addTo(map);
+      L.circleMarker(ll[0], { radius: 8, color: '#2b8a3e', fillOpacity: 1 }).addTo(map).bindTooltip('Départ');
+      L.circleMarker(ll[ll.length - 1], { radius: 8, color: '#c92a2a', fillOpacity: 1 }).addTo(map).bindTooltip('Arrivée');
+      map.fitBounds(line.getBounds(), { padding: [30, 30] });
+
+      info.textContent = km.toFixed(1) + ' km' + (lastEle !== null ? ' · D+ ' + Math.round(dplus) + ' m' : '');
+    }
+
+    var f = new URLSearchParams(location.search).get('f');
+    if (!f) {
+      info.textContent = 'Aucun fichier demandé';
+    } else {
+      fetch(API + '?raw=1&f=' + encodeURIComponent(f))
+        .then(function (r) { return r.text(); })
+        .then(function (txt) {
+          if (txt.indexOf('ERREUR:') === 0) throw new Error(txt.slice(7).trim());
+          draw(txt);
+        })
+        .catch(function (e) { info.textContent = e.message; });
+    }
+  </script>
+</body>
+</html>
