@@ -2,60 +2,631 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Étapes</title>
+  <meta property="og:title" content="Étapes">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --fond: #14110e; --carte: #1d1813; --trait: #3a3027;
-      --papier: #ebe0cb; --discret: #8f8470; --accent: #e08a2e;
+      --fond: #12100e;
+      --carte: #1b1612;
+      --carte-hover: #231d17;
+      --carte-prochaine: #201a14;
+      --trait: #342a22;
+      --trait-subtil: #251e18;
+      --trait-actif: #5c4a3b;
+      --papier: #f2ebd9;
+      --papier-doux: #ded2bd;
+      --discret: #9c907b;
+      --discret-sombre: #665c4c;
+      --accent: #e58e26;
+      --accent-hover: #f39c38;
+      --accent-fond: rgba(229, 142, 38, 0.12);
+      --accent-trait: rgba(229, 142, 38, 0.35);
+      --succes: #5ba370;
+      --succes-fond: rgba(91, 163, 112, 0.12);
       --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
       --mono: 'IBM Plex Mono', 'Courier New', monospace;
     }
-    * { box-sizing: border-box; }
-    html { background: var(--fond); }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      background: var(--fond);
+      color-scheme: dark;
+      scroll-behavior: smooth;
+    }
+
     body {
-      margin: 0; color: var(--papier); background: var(--fond);
-      font-family: var(--serif); -webkit-font-smoothing: antialiased;
+      margin: 0;
+      color: var(--papier);
+      background: var(--fond);
+      font-family: var(--serif);
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding: 0;
     }
-    main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
 
-    #entete:empty { display: none; }
-    #entete h1 { font-weight: 600; font-size: clamp(28px, 6vw, 48px); margin: 8px 0 4px; letter-spacing: -.02em; }
-    #entete p { margin: 0 0 24px; color: var(--discret); font-size: 18px; }
-
-    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0 12px; }
-    @media (min-width: 640px) { .stats { grid-template-columns: repeat(4, 1fr); } }
-    .stat { background: var(--carte); border: 1px solid var(--trait); border-radius: 10px; padding: 14px 16px; }
-    .stat b { display: block; font-size: 30px; font-weight: 600; line-height: 1.1; }
-    .stat small { font: 400 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--discret); }
-
-    .avance { margin: 0 0 20px; }
-    .piste { height: 6px; background: var(--trait); border-radius: 3px; overflow: hidden; }
-    .piste i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .8s ease; }
-    .avance span { display: block; margin-top: 6px; font: 400 12px var(--mono); color: var(--discret); }
-
-    #map { height: 55vh; min-height: 320px; border: 1px solid var(--trait); border-radius: 10px; }
-    .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.45); }
-    .leaflet-container { background: #1a1a1a; font-family: var(--mono); }
-
-    #journal { margin: 28px 0 0; padding: 0; list-style: none; border-left: 1px solid var(--trait); }
-    .etape { position: relative; padding: 4px 0 18px 22px; cursor: pointer; opacity: .55; }
-    .etape::before {
-      content: ''; position: absolute; left: -6px; top: 10px; width: 11px; height: 11px;
-      border-radius: 50%; background: var(--fond); border: 1px solid var(--discret);
+    /* Container */
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
     }
-    .etape.fait { opacity: 1; }
-    .etape.fait::before { background: var(--accent); border-color: var(--accent); }
-    .etape .jour { font: 400 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--discret); }
-    .etape .trajet { font-size: 20px; margin: 2px 0; }
-    .etape .trajet i { color: var(--accent); font-style: normal; padding: 0 6px; }
-    .etape .meta { font: 400 13px var(--mono); color: var(--discret); }
 
-    #erreur { color: var(--accent); font: 14px var(--mono); }
+    @media (min-width: 768px) {
+      main {
+        padding: 40px 24px 96px;
+      }
+    }
+
+    /* En-tête conditionnelle */
+    #entete:empty {
+      display: none;
+    }
+    #entete {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--trait-subtil);
+    }
+    #entete h1 {
+      font-weight: 600;
+      font-size: clamp(26px, 5vw, 42px);
+      letter-spacing: -0.02em;
+      color: var(--papier);
+      line-height: 1.15;
+    }
+    #entete p {
+      margin-top: 8px;
+      color: var(--discret);
+      font-family: var(--mono);
+      font-size: 14px;
+    }
+
+    /* Carte Prochaine étape */
+    .prochaine-carte {
+      display: none;
+      background: var(--carte-prochaine);
+      border: 1px solid var(--accent-trait);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .prochaine-carte:hover {
+      background: #251e18;
+      border-color: var(--accent);
+    }
+    .prochaine-carte:active {
+      transform: scale(0.995);
+    }
+    .prochaine-etiquette {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font: 500 11px var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .prochaine-etiquette::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+    .prochaine-trajet {
+      font-size: clamp(19px, 3.2vw, 24px);
+      font-weight: 600;
+      color: var(--papier);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      margin-bottom: 6px;
+      line-height: 1.25;
+    }
+    .prochaine-trajet i {
+      color: var(--accent);
+      font-style: normal;
+      font-family: var(--mono);
+      font-weight: 400;
+    }
+    .prochaine-meta {
+      font: 400 13px var(--mono);
+      color: var(--discret);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      font-variant-numeric: tabular-nums;
+    }
+    .prochaine-meta span {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Grille de statistiques principales */
+    .stats-principales {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    @media (min-width: 640px) {
+      .stats-principales {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+    }
+
+    .stat-boite {
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 84px;
+      transition: border-color 0.2s ease;
+    }
+    .stat-boite:hover {
+      border-color: var(--trait-actif);
+    }
+    .stat-boite small {
+      font: 400 11px var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--discret);
+      margin-bottom: 4px;
+      display: block;
+    }
+    .stat-boite b {
+      display: block;
+      font-size: clamp(22px, 3.5vw, 28px);
+      font-weight: 600;
+      line-height: 1.1;
+      color: var(--papier);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-boite .stat-sous-titre {
+      font: 400 11px var(--mono);
+      color: var(--discret-sombre);
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Barre d'avancement */
+    .section-avance {
+      margin: 4px 0 20px;
+    }
+    .piste-avance {
+      height: 6px;
+      background: var(--trait-subtil);
+      border: 1px solid var(--trait);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .barre-progression {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #c97519, #f09a34);
+      border-radius: 999px;
+      transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .avance-infos {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      font: 400 12px var(--mono);
+      color: var(--discret);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Carte Leaflet */
+    .conteneur-carte {
+      position: relative;
+      margin-bottom: 24px;
+      border-radius: 14px;
+      border: 1px solid var(--trait);
+      overflow: hidden;
+      background: #14110e;
+    }
+    #map {
+      height: 48vh;
+      min-height: 320px;
+      max-height: 580px;
+      width: 100%;
+      z-index: 1;
+    }
+    .leaflet-tile-pane {
+      filter: invert(1) hue-rotate(180deg) brightness(0.86) contrast(1.1) saturate(0.4);
+    }
+    .leaflet-container {
+      background: #15120f;
+      font-family: var(--mono);
+    }
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+      background: var(--carte);
+      color: var(--papier);
+      border: 1px solid var(--trait);
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .leaflet-tooltip {
+      background: var(--carte);
+      color: var(--papier);
+      border: 1px solid var(--trait);
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 4px 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+    .leaflet-tooltip-top:before { border-top-color: var(--trait); }
+    .leaflet-tooltip-bottom:before { border-bottom-color: var(--trait); }
+    .leaflet-tooltip-left:before { border-left-color: var(--trait); }
+    .leaflet-tooltip-right:before { border-right-color: var(--trait); }
+
+    .bouton-carte-recentrer {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      z-index: 500;
+      background: var(--carte);
+      color: var(--papier-doux);
+      border: 1px solid var(--trait);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font: 500 12px var(--mono);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      touch-action: manipulation;
+    }
+    .bouton-carte-recentrer:hover {
+      background: #251e18;
+      border-color: var(--accent);
+      color: var(--papier);
+    }
+
+    /* Grille d'infos secondaires */
+    .titre-section {
+      font-size: clamp(16px, 2.5vw, 19px);
+      font-weight: 600;
+      color: var(--papier);
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .titre-section small {
+      font: 400 12px var(--mono);
+      color: var(--discret);
+    }
+
+    .stats-secondaires {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    @media (min-width: 640px) {
+      .stats-secondaires {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+    }
+
+    .stat-secondaire {
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 80px;
+    }
+    .stat-secondaire small {
+      font: 400 11px var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--discret);
+      margin-bottom: 4px;
+      display: block;
+    }
+    .stat-secondaire b {
+      display: block;
+      font-size: clamp(18px, 2.5vw, 22px);
+      font-weight: 600;
+      color: var(--papier);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+    }
+    .stat-secondaire .detail {
+      font: 400 11px var(--mono);
+      color: var(--discret);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Journal des étapes */
+    .section-journal {
+      margin-top: 8px;
+    }
+    .journal-en-tete {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--trait-subtil);
+    }
+    .journal-en-tete h2 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--papier);
+    }
+    .journal-en-tete span {
+      font: 400 12px var(--mono);
+      color: var(--discret);
+    }
+
+    #journal {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      position: relative;
+    }
+    #journal::before {
+      content: '';
+      position: absolute;
+      top: 14px;
+      bottom: 24px;
+      left: 17px;
+      width: 1px;
+      background: var(--trait);
+      z-index: 0;
+    }
+
+    .etape {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 10px 12px 14px;
+      margin-bottom: 4px;
+      border-radius: 12px;
+      cursor: pointer;
+      opacity: 0.52;
+      transition: background 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
+      z-index: 1;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .etape:hover {
+      opacity: 0.85;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .etape:active {
+      transform: scale(0.995);
+    }
+
+    /* Puce indicateur */
+    .etape-puce-col {
+      width: 12px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      padding-top: 5px;
+    }
+    .etape-puce {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--fond);
+      border: 1px solid var(--discret);
+      box-shadow: 0 0 0 3px var(--fond);
+      transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* État fait */
+    .etape.fait {
+      opacity: 0.95;
+    }
+    .etape.fait:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .etape.fait .etape-puce {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--fond);
+    }
+
+    /* Prochaine étape immédiate dans la liste */
+    .etape.prochaine-liste {
+      opacity: 1;
+      background: rgba(229, 142, 38, 0.06);
+      border: 1px solid var(--accent-trait);
+    }
+    .etape.prochaine-liste .etape-puce {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--fond), 0 0 8px var(--accent);
+    }
+
+    /* Contenu de la ligne d'étape */
+    .etape-corps {
+      flex: 1;
+      min-width: 0;
+    }
+    .etape-entete-ligne {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+    .etape .jour {
+      font: 500 11px var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--discret);
+    }
+    .etape.fait .jour {
+      color: var(--discret);
+    }
+    .etape.prochaine-liste .jour {
+      color: var(--accent);
+    }
+
+    .etape-badge-etat {
+      font: 400 11px var(--mono);
+      color: var(--discret-sombre);
+    }
+    .etape.fait .etape-badge-etat {
+      color: var(--accent);
+    }
+    .etape.prochaine-liste .etape-badge-etat {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .etape .trajet {
+      font-size: clamp(16px, 2.6vw, 19px);
+      font-weight: 600;
+      color: var(--papier);
+      margin: 2px 0 4px;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+    .etape .trajet i {
+      color: var(--accent);
+      font-style: normal;
+      padding: 0 4px;
+      font-family: var(--mono);
+      font-weight: 400;
+    }
+
+    .etape .meta {
+      font: 400 13px var(--mono);
+      color: var(--discret);
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px 8px;
+    }
+    .etape .meta span.separateur {
+      color: var(--trait-actif);
+    }
+
+    /* Éléments masqués au chargement (au-delà des étapes faites + 3 suivantes) */
+    .etape-masquee {
+      display: none !important;
+    }
+
+    /* Bouton voir tout */
+    .zone-deplier {
+      margin: 16px 0 0;
+      text-align: center;
+      padding-left: 26px;
+    }
+    .bouton-deplier {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 13px 20px;
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 10px;
+      color: var(--papier);
+      font: 500 13px var(--mono);
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      touch-action: manipulation;
+    }
+    .bouton-deplier:hover {
+      background: #241d17;
+      border-color: var(--trait-actif);
+      color: var(--papier);
+    }
+    .bouton-deplier:active {
+      transform: scale(0.99);
+    }
+    .bouton-deplier i {
+      font-style: normal;
+      font-size: 14px;
+      color: var(--accent);
+      transition: transform 0.2s ease;
+    }
+
+    /* Message d'erreur */
+    #erreur {
+      color: var(--accent);
+      font: 14px var(--mono);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      background: var(--accent-fond);
+      border: 1px solid var(--accent-trait);
+      border-radius: 8px;
+      display: none;
+    }
+
+    /* Optimisations mobiles */
+    @media (max-width: 600px) {
+      main {
+        padding: 18px 12px 64px;
+      }
+      .stat-boite {
+        padding: 12px 14px;
+        min-height: 76px;
+      }
+      .stat-secondaire {
+        padding: 10px 12px;
+      }
+      .etape {
+        padding: 10px 8px 12px;
+      }
+      #journal::before {
+        left: 13px;
+      }
+      .zone-deplier {
+        padding-left: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -63,19 +634,99 @@
   <header id="entete"></header>
   <div id="erreur"></div>
 
-  <section class="stats">
-    <div class="stat"><b id="s-etapes">–</b><small>Étapes</small></div>
-    <div class="stat"><b id="s-km">–</b><small>Km parcourus</small></div>
-    <div class="stat"><b id="s-reste">–</b><small>Km restants</small></div>
-    <div class="stat"><b id="s-d">–</b><small>Dénivelé</small></div>
-  </section>
-  <div class="avance">
-    <div class="piste"><i id="barre"></i></div>
-    <span id="pct"></span>
+  <!-- Prochaine étape (affichée si une étape reste à faire) -->
+  <div id="bloc-prochaine" class="prochaine-carte" role="button" tabindex="0">
+    <div class="prochaine-etiquette">Prochaine étape</div>
+    <div class="prochaine-trajet">
+      <span id="p-jour"></span>
+      <span id="p-dep"></span><i>→</i><span id="p-arr"></span>
+    </div>
+    <div class="prochaine-meta">
+      <span id="p-km">–</span>
+      <span id="p-denivele">–</span>
+      <span id="p-temps">–</span>
+    </div>
   </div>
 
-  <div id="map"></div>
-  <ol id="journal"></ol>
+  <!-- Statistiques principales -->
+  <section class="stats-principales">
+    <div class="stat-boite">
+      <small>Étapes</small>
+      <b id="s-etapes">–</b>
+      <div id="s-etapes-detail" class="stat-sous-titre">–</div>
+    </div>
+    <div class="stat-boite">
+      <small>Km parcourus</small>
+      <b id="s-km">–</b>
+      <div id="s-km-detail" class="stat-sous-titre">–</div>
+    </div>
+    <div class="stat-boite">
+      <small>Km restants</small>
+      <b id="s-reste">–</b>
+      <div id="s-reste-detail" class="stat-sous-titre">–</div>
+    </div>
+    <div class="stat-boite">
+      <small>Dénivelé</small>
+      <b id="s-d">–</b>
+      <div id="s-d-detail" class="stat-sous-titre">–</div>
+    </div>
+  </section>
+
+  <!-- Progression -->
+  <div class="section-avance">
+    <div class="piste-avance"><i id="barre" class="barre-progression"></i></div>
+    <div class="avance-infos">
+      <span id="pct">0 %</span>
+      <span id="avance-resume"></span>
+    </div>
+  </div>
+
+  <!-- Carte -->
+  <div class="conteneur-carte">
+    <div id="map"></div>
+    <button id="btn-recentrer" class="bouton-carte-recentrer" type="button" title="Centrer sur le parcours">
+      Centrer sur le parcours
+    </button>
+  </div>
+
+  <!-- Statistiques secondaires calculées -->
+  <section class="stats-secondaires">
+    <div class="stat-secondaire">
+      <small>Km moyen / étape</small>
+      <b id="s-km-moyen">–</b>
+      <div id="s-km-moyen-detail" class="detail">–</div>
+    </div>
+    <div class="stat-secondaire">
+      <small>Plus longue étape</small>
+      <b id="s-max-km">–</b>
+      <div id="s-max-km-detail" class="detail">–</div>
+    </div>
+    <div class="stat-secondaire">
+      <small>Plus gros dénivelé</small>
+      <b id="s-max-d">–</b>
+      <div id="s-max-d-detail" class="detail">–</div>
+    </div>
+    <div class="stat-secondaire">
+      <small>Temps total estimé</small>
+      <b id="s-temps-total">–</b>
+      <div id="s-etapes-restantes-detail" class="detail">–</div>
+    </div>
+  </section>
+
+  <!-- Journal des étapes -->
+  <section class="section-journal">
+    <div class="journal-en-tete">
+      <h2>Étapes</h2>
+      <span id="journal-compteur"></span>
+    </div>
+    <ol id="journal"></ol>
+    <div id="zone-deplier" class="zone-deplier" style="display: none;">
+      <button id="btn-deplier" class="bouton-deplier" type="button">
+        <span id="btn-deplier-texte">Voir tout</span>
+        <i id="btn-deplier-icone">↓</i>
+      </button>
+    </div>
+  </section>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -87,15 +738,24 @@
 
   var API = 'https://script.google.com/macros/s/AKfycbyptX2-OXsxh8yXqk9Hi_ygvcxP1_4vD0AT-KzZPcTFzR9AfEKHbQnBvgi3Pvw5a-LL/exec';
   var $ = function (id) { return document.getElementById(id); };
-  var fmt = function (n) { return Number(n).toLocaleString('fr-FR'); };
+  var fmt = function (n) { return Number(n || 0).toLocaleString('fr-FR'); };
+  var fmtDec = function (n, d) {
+    return Number(n || 0).toLocaleString('fr-FR', {
+      minimumFractionDigits: d !== undefined ? d : 1,
+      maximumFractionDigits: d !== undefined ? d : 1
+    });
+  };
 
   var map = L.map('map', { scrollWheelZoom: false }).setView([46.6, 2.5], 5);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '© OpenStreetMap'
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
   }).addTo(map);
 
   var pistes = {};   // jour -> polyline
   var etapesParJour = {};
+  var toutesLesVillesCoords = [];
+  var etapesDepliees = false;
 
   if (TITRE) {
     document.title = TITRE;
@@ -104,63 +764,286 @@
     if (SOUS_TITRE) $('entete').querySelector('p').textContent = SOUS_TITRE;
   }
 
-  function afficherStats(t) {
-    $('s-etapes').textContent = t.jours_faits + ' / ' + t.jours;
-    $('s-km').textContent = fmt(t.km_faits);
-    $('s-reste').textContent = fmt(t.km_restants);
+  // Parse les temps sous forme "5 h 42", "4 h 07", "4h30", "4:30"
+  function parseMinutes(str) {
+    if (!str) return 0;
+    var m = String(str).match(/(\d+)\s*(?:h|:)\s*(\d+)?/i);
+    if (m) {
+      var h = parseInt(m[1], 10) || 0;
+      var min = parseInt(m[2], 10) || 0;
+      return h * 60 + min;
+    }
+    var num = parseFloat(str);
+    return isNaN(num) ? 0 : Math.round(num * 60);
+  }
+
+  function formaterDuree(minutesTotales) {
+    var h = Math.floor(minutesTotales / 60);
+    var min = minutesTotales % 60;
+    if (min === 0) return h + ' h';
+    return h + ' h ' + (min < 10 ? '0' : '') + min;
+  }
+
+  function afficherStats(t, etapes) {
+    var totalJours = t.jours || (etapes ? etapes.length : 0);
+    var faitsJours = t.jours_faits || 0;
+    var restantsJours = Math.max(0, totalJours - faitsJours);
+
+    // Statistiques principales
+    $('s-etapes').textContent = faitsJours + ' / ' + totalJours;
+    $('s-etapes-detail').textContent = restantsJours + ' restante' + (restantsJours > 1 ? 's' : '');
+
+    $('s-km').textContent = fmt(t.km_faits) + ' km';
+    if (t.km_total) {
+      $('s-km-detail').textContent = 'sur ' + fmt(t.km_total) + ' km';
+    }
+
+    $('s-reste').textContent = fmt(t.km_restants) + ' km';
+    $('s-reste-detail').textContent = restantsJours + ' étape' + (restantsJours > 1 ? 's' : '');
+
     $('s-d').textContent = '+' + fmt(t.denivele_fait) + ' m';
+    if (t.denivele_total) {
+      $('s-d-detail').textContent = 'sur +' + fmt(t.denivele_total) + ' m';
+    }
+
     $('pct').textContent = t.avancement + ' %';
-    setTimeout(function () { $('barre').style.width = t.avancement + '%'; }, 100);
+    if (t.km_total) {
+      $('avance-resume').textContent = fmt(t.km_faits) + ' / ' + fmt(t.km_total) + ' km';
+    }
+
+    setTimeout(function () {
+      $('barre').style.width = t.avancement + '%';
+    }, 100);
+
+    // Calculs additionnels sur les données existantes
+    if (etapes && etapes.length) {
+      // 1. Km moyen par étape
+      var kmTotal = t.km_total || etapes.reduce(function (acc, e) { return acc + (e.km || 0); }, 0);
+      var kmMoyen = kmTotal / (totalJours || 1);
+      $('s-km-moyen').textContent = fmtDec(kmMoyen, 1) + ' km';
+      $('s-km-moyen-detail').textContent = totalJours + ' étapes au total';
+
+      // 2. Plus longue étape
+      var maxKmEtape = null;
+      etapes.forEach(function (e) {
+        if (!maxKmEtape || (e.km || 0) > (maxKmEtape.km || 0)) maxKmEtape = e;
+      });
+      if (maxKmEtape) {
+        $('s-max-km').textContent = fmtDec(maxKmEtape.km, 1) + ' km';
+        $('s-max-km-detail').textContent = 'Jour ' + maxKmEtape.jour + ' · ' + maxKmEtape.depart + ' → ' + maxKmEtape.arrivee;
+      }
+
+      // 3. Plus gros dénivelé
+      var maxDEtape = null;
+      etapes.forEach(function (e) {
+        if (!maxDEtape || (e.denivele || 0) > (maxDEtape.denivele || 0)) maxDEtape = e;
+      });
+      if (maxDEtape) {
+        $('s-max-d').textContent = '+' + fmt(maxDEtape.denivele) + ' m';
+        $('s-max-d-detail').textContent = 'Jour ' + maxDEtape.jour + ' · ' + maxDEtape.depart + ' → ' + maxDEtape.arrivee;
+      }
+
+      // 4. Temps total de roulage estimé
+      var minutesTotales = etapes.reduce(function (acc, e) {
+        return acc + parseMinutes(e.temps);
+      }, 0);
+      $('s-temps-total').textContent = formaterDuree(minutesTotales);
+      $('s-etapes-restantes-detail').textContent = restantsJours + ' étape' + (restantsJours > 1 ? 's' : '') + ' restante' + (restantsJours > 1 ? 's' : '');
+
+      // 5. Prochaine étape
+      var prochaine = etapes.find(function (e) { return !e.fait; });
+      var blocProchaine = $('bloc-prochaine');
+      if (prochaine) {
+        blocProchaine.style.display = 'block';
+        $('p-jour').textContent = 'Jour ' + prochaine.jour + ' · ';
+        $('p-dep').textContent = prochaine.depart;
+        $('p-arr').textContent = prochaine.arrivee;
+        $('p-km').textContent = fmtDec(prochaine.km, 1) + ' km';
+        $('p-denivele').textContent = '+' + fmt(prochaine.denivele) + ' m';
+        $('p-temps').textContent = prochaine.temps || '';
+        blocProchaine.onclick = function () { zoomer(prochaine.jour); };
+        blocProchaine.onkeydown = function (evt) {
+          if (evt.key === 'Enter' || evt.key === ' ') {
+            evt.preventDefault();
+            zoomer(prochaine.jour);
+          }
+        };
+      } else {
+        blocProchaine.style.display = 'none';
+      }
+    }
   }
 
   function afficherJournal(etapes) {
     var ol = $('journal');
-    etapes.forEach(function (e) {
+    ol.innerHTML = '';
+    $('journal-compteur').textContent = etapes.length + ' étapes';
+
+    // Index de la première étape non faite
+    var premierIndexNonFait = -1;
+    for (var idx = 0; idx < etapes.length; idx++) {
+      if (!etapes[idx].fait) {
+        premierIndexNonFait = idx;
+        break;
+      }
+    }
+
+    // Indices visibles par défaut : toutes les étapes faites + les 3 suivantes
+    // Si aucune étape n'est faite, on montre les 3 premières
+    var maxIndexVisible = (premierIndexNonFait === -1)
+      ? etapes.length - 1
+      : premierIndexNonFait + 2;
+
+    var ilYaDesEtapesMasquees = maxIndexVisible < etapes.length - 1;
+
+    etapes.forEach(function (e, index) {
       etapesParJour[e.jour] = e;
+
       var li = document.createElement('li');
-      li.className = 'etape' + (e.fait ? ' fait' : '');
-      li.innerHTML = '<div class="jour"></div><div class="trajet"></div><div class="meta"></div>';
-      li.querySelector('.jour').textContent = 'Jour ' + e.jour;
-      li.querySelector('.trajet').innerHTML = '<span></span><i>→</i><span></span>';
-      var sp = li.querySelectorAll('.trajet span');
-      sp[0].textContent = e.depart; sp[1].textContent = e.arrivee;
-      li.querySelector('.meta').textContent =
-        fmt(e.km) + ' km · D+ ' + fmt(e.denivele) + ' m · ' + e.temps;
+      var estProchaine = (index === premierIndexNonFait);
+      var classe = 'etape';
+      if (e.fait) classe += ' fait';
+      if (estProchaine) classe += ' prochaine-liste';
+
+      var estMasquee = !etapesDepliees && (index > maxIndexVisible);
+      if (estMasquee) classe += ' etape-masquee';
+
+      li.className = classe;
+      li.setAttribute('data-index', index);
+      li.setAttribute('data-jour', e.jour);
+
+      var badgeText = e.fait ? 'Faite' : (estProchaine ? 'À venir' : '');
+
+      li.innerHTML =
+        '<div class="etape-puce-col"><div class="etape-puce"></div></div>' +
+        '<div class="etape-corps">' +
+          '<div class="etape-entete-ligne">' +
+            '<span class="jour">Jour ' + e.jour + '</span>' +
+            (badgeText ? '<span class="etape-badge-etat">' + badgeText + '</span>' : '') +
+          '</div>' +
+          '<div class="trajet">' +
+            '<span>' + e.depart + '</span><i>→</i><span>' + e.arrivee + '</span>' +
+          '</div>' +
+          '<div class="meta">' +
+            '<span>' + fmtDec(e.km, 1) + ' km</span>' +
+            '<span class="separateur">·</span>' +
+            '<span>+' + fmt(e.denivele) + ' m</span>' +
+            '<span class="separateur">·</span>' +
+            '<span>' + (e.temps || '–') + '</span>' +
+          '</div>' +
+        '</div>';
+
       li.addEventListener('click', function () { zoomer(e.jour); });
       ol.appendChild(li);
     });
+
+    // Gestion du bouton voir tout
+    var zoneDeplier = $('zone-deplier');
+    var btnDeplier = $('btn-deplier');
+    var btnTexte = $('btn-deplier-texte');
+    var btnIcone = $('btn-deplier-icone');
+
+    if (ilYaDesEtapesMasquees || etapesDepliees) {
+      zoneDeplier.style.display = 'block';
+      var compteRestantes = Math.max(0, etapes.length - (maxIndexVisible + 1));
+
+      if (etapesDepliees) {
+        btnTexte.textContent = 'Voir moins';
+        btnIcone.textContent = '↑';
+      } else {
+        btnTexte.textContent = 'Voir tout (' + compteRestantes + ' restante' + (compteRestantes > 1 ? 's' : '') + ')';
+        btnIcone.textContent = '↓';
+      }
+
+      btnDeplier.onclick = function () {
+        etapesDepliees = !etapesDepliees;
+        var toutesLignes = ol.querySelectorAll('.etape');
+        toutesLignes.forEach(function (el) {
+          var i = parseInt(el.getAttribute('data-index'), 10);
+          if (!etapesDepliees && i > maxIndexVisible) {
+            el.classList.add('etape-masquee');
+          } else {
+            el.classList.remove('etape-masquee');
+          }
+        });
+
+        if (etapesDepliees) {
+          btnTexte.textContent = 'Voir moins';
+          btnIcone.textContent = '↑';
+        } else {
+          btnTexte.textContent = 'Voir tout (' + compteRestantes + ' restante' + (compteRestantes > 1 ? 's' : '') + ')';
+          btnIcone.textContent = '↓';
+          $('journal').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      };
+    } else {
+      zoneDeplier.style.display = 'none';
+    }
   }
 
   function zoomer(jour) {
     var e = etapesParJour[jour], cible = null;
-    if (pistes[jour]) cible = pistes[jour].getBounds();
-    else if (e && e.dep && e.arr) cible = L.latLngBounds([[e.dep.lat, e.dep.lng], [e.arr.lat, e.arr.lng]]);
+    if (pistes[jour]) {
+      cible = pistes[jour].getBounds();
+    } else if (e && e.dep && e.arr) {
+      cible = L.latLngBounds([[e.dep.lat, e.dep.lng], [e.arr.lat, e.arr.lng]]);
+    }
     if (!cible) return;
     document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    map.fitBounds(cible, { padding: [30, 30] });
+    map.fitBounds(cible, { padding: [40, 40], maxZoom: 13 });
   }
 
   function afficherVilles(etapes) {
-    var villes = {};   // nom -> {lat,lng,atteinte}
+    var villes = {};   // nom -> {lat,lng,atteinte,prochaine}
+    var premierJourNonFait = -1;
+    for (var k = 0; k < etapes.length; k++) {
+      if (!etapes[k].fait) {
+        premierJourNonFait = etapes[k].jour;
+        break;
+      }
+    }
+
     etapes.forEach(function (e) {
       [[e.depart, e.dep], [e.arrivee, e.arr]].forEach(function (c) {
         if (!c[1]) return;
-        var v = villes[c[0]] || (villes[c[0]] = { lat: c[1].lat, lng: c[1].lng, atteinte: false });
+        var v = villes[c[0]] || (villes[c[0]] = { lat: c[1].lat, lng: c[1].lng, atteinte: false, prochaine: false });
         if (e.fait) v.atteinte = true;
+        if (e.jour === premierJourNonFait) v.prochaine = true;
       });
     });
-    var pts = [];
+
+    toutesLesVillesCoords = [];
     Object.keys(villes).forEach(function (nom) {
       var v = villes[nom];
-      pts.push([v.lat, v.lng]);
+      toutesLesVillesCoords.push([v.lat, v.lng]);
+
+      var couleurBord = v.atteinte ? '#e58e26' : (v.prochaine ? '#f5a742' : '#736654');
+      var couleurFond = v.atteinte ? '#e58e26' : (v.prochaine ? '#2a2016' : '#14110e');
+      var rayon = v.atteinte ? 6 : (v.prochaine ? 6 : 4);
+      var epaisseur = v.prochaine ? 2.5 : 1.5;
+
       L.circleMarker([v.lat, v.lng], {
-        radius: v.atteinte ? 6 : 4,
-        color: v.atteinte ? '#e08a2e' : '#8f8470',
-        fillColor: v.atteinte ? '#e08a2e' : '#14110e',
-        fillOpacity: 1, weight: 1.5
-      }).addTo(map).bindTooltip(nom);
+        radius: rayon,
+        color: couleurBord,
+        fillColor: couleurFond,
+        fillOpacity: 1,
+        weight: epaisseur
+      }).addTo(map).bindTooltip(nom, {
+        direction: 'top',
+        offset: [0, -6]
+      });
     });
-    if (pts.length) map.fitBounds(pts, { padding: [30, 30] });
+
+    if (toutesLesVillesCoords.length) {
+      map.fitBounds(toutesLesVillesCoords, { padding: [36, 36] });
+    }
+
+    // Gestion du bouton recentrer
+    $('btn-recentrer').onclick = function () {
+      if (toutesLesVillesCoords.length) {
+        map.fitBounds(toutesLesVillesCoords, { padding: [36, 36] });
+      }
+    };
   }
 
   function lirePoints(txt) {
@@ -170,7 +1053,9 @@
     var pas = Math.max(1, Math.floor(pts.length / 500));
     var ll = [];
     pts.forEach(function (p, i) {
-      if (i % pas === 0 || i === pts.length - 1) ll.push([+p.getAttribute('lat'), +p.getAttribute('lon')]);
+      if (i % pas === 0 || i === pts.length - 1) {
+        ll.push([+p.getAttribute('lat'), +p.getAttribute('lon')]);
+      }
     });
     return ll;
   }
@@ -186,7 +1071,15 @@
         .then(function (txt) {
           if (txt.indexOf('ERREUR:') === 0) return;
           var ll = lirePoints(txt);
-          if (ll.length) pistes[j] = L.polyline(ll, { color: '#e08a2e', weight: 4, opacity: .95 }).addTo(map);
+          if (ll.length) {
+            pistes[j] = L.polyline(ll, {
+              color: '#e58e26',
+              weight: 4,
+              opacity: 0.95,
+              lineJoin: 'round',
+              lineCap: 'round'
+            }).addTo(map);
+          }
         })
         .catch(function () {})
         .then(suivant);
@@ -194,16 +1087,21 @@
     for (var k = 0; k < 3; k++) suivant();
   }
 
+  // Récupération des données publiques
   fetch(API + '?public=1')
     .then(function (r) { return r.json(); })
     .then(function (d) {
       if (d.erreur) throw new Error(d.erreur);
-      afficherStats(d.totaux);
+      afficherStats(d.totaux, d.etapes);
       afficherJournal(d.etapes);
       afficherVilles(d.etapes);
       chargerPistes(d.etapes);
     })
-    .catch(function (e) { $('erreur').textContent = 'Données indisponibles : ' + e.message; });
+    .catch(function (e) {
+      var errEl = $('erreur');
+      errEl.style.display = 'block';
+      errEl.textContent = 'Données indisponibles : ' + e.message;
+    });
 </script>
 </body>
 </html>
