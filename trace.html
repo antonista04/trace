@@ -12,20 +12,45 @@
       background: #fff; padding: 6px 10px; border-radius: 6px;
       font: 14px sans-serif; box-shadow: 0 1px 4px rgba(0,0,0,.3);
     }
+    #gm {
+      display: none; position: absolute; z-index: 1000; bottom: 28px; left: 12px;
+      background: #1a73e8; color: #fff; padding: 10px 14px; border-radius: 8px;
+      font: 14px sans-serif; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,.4);
+    }
   </style>
 </head>
 <body>
   <div id="info">Chargement…</div>
+  <a id="gm" target="_blank" rel="noopener">Ouvrir dans Google Maps (vélo)</a>
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     var API = 'https://script.google.com/macros/s/AKfycbyptX2-OXsxh8yXqk9Hi_ygvcxP1_4vD0AT-KzZPcTFzR9AfEKHbQnBvgi3Pvw5a-LL/exec';
+    var NB_POINTS = 8; // points intermédiaires envoyés à Google Maps
     var info = document.getElementById('info');
     var map = L.map('map').setView([46.6, 2.5], 5);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19, attribution: '© OpenStreetMap'
     }).addTo(map);
+
+    function fmt(p) { return p[0].toFixed(5) + ',' + p[1].toFixed(5); }
+
+    function lienGoogleMaps(ll, cum) {
+      var total = cum[cum.length - 1];
+      var wps = [];
+      for (var k = 1; k <= NB_POINTS; k++) {
+        var cible = total * k / (NB_POINTS + 1);
+        var i = 0;
+        while (i < cum.length - 1 && cum[i] < cible) i++;
+        wps.push(fmt(ll[i]));
+      }
+      return 'https://www.google.com/maps/dir/?api=1' +
+        '&origin=' + fmt(ll[0]) +
+        '&destination=' + fmt(ll[ll.length - 1]) +
+        '&waypoints=' + wps.join('|') +
+        '&travelmode=bicycling';
+    }
 
     function draw(txt) {
       var xml = new DOMParser().parseFromString(txt, 'text/xml');
@@ -33,10 +58,13 @@
       if (!pts.length) pts = [].slice.call(xml.getElementsByTagName('rtept'));
       if (!pts.length) { info.textContent = 'Aucun point dans ce GPX'; return; }
 
-      var ll = [], km = 0, dplus = 0, lastEle = null;
+      var ll = [], cum = [0], km = 0, dplus = 0, lastEle = null;
       pts.forEach(function (p, i) {
         ll.push([+p.getAttribute('lat'), +p.getAttribute('lon')]);
-        if (i > 0) km += map.distance(ll[i - 1], ll[i]) / 1000;
+        if (i > 0) {
+          km += map.distance(ll[i - 1], ll[i]) / 1000;
+          cum.push(km);
+        }
         var e = p.getElementsByTagName('ele')[0];
         if (e) {
           var ele = +e.textContent;
@@ -51,6 +79,10 @@
       map.fitBounds(line.getBounds(), { padding: [30, 30] });
 
       info.textContent = km.toFixed(1) + ' km' + (lastEle !== null ? ' · D+ ' + Math.round(dplus) + ' m' : '');
+
+      var gm = document.getElementById('gm');
+      gm.href = lienGoogleMaps(ll, cum);
+      gm.style.display = 'block';
     }
 
     var f = new URLSearchParams(location.search).get('f');
