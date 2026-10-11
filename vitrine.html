@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Étapes</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fond: #14110e; --carte: #1d1813; --trait: #3a3027;
+      --papier: #ebe0cb; --discret: #8f8470; --accent: #e08a2e;
+      --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+      --mono: 'IBM Plex Mono', 'Courier New', monospace;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--fond); }
+    body {
+      margin: 0; color: var(--papier); background: var(--fond);
+      font-family: var(--serif); -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+
+    #entete:empty { display: none; }
+    #entete h1 { font-weight: 600; font-size: clamp(28px, 6vw, 48px); margin: 8px 0 4px; letter-spacing: -.02em; }
+    #entete p { margin: 0 0 24px; color: var(--discret); font-size: 18px; }
+
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0 12px; }
+    @media (min-width: 640px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+    .stat { background: var(--carte); border: 1px solid var(--trait); border-radius: 10px; padding: 14px 16px; }
+    .stat b { display: block; font-size: 30px; font-weight: 600; line-height: 1.1; }
+    .stat small { font: 400 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--discret); }
+
+    .avance { margin: 0 0 20px; }
+    .piste { height: 6px; background: var(--trait); border-radius: 3px; overflow: hidden; }
+    .piste i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .8s ease; }
+    .avance span { display: block; margin-top: 6px; font: 400 12px var(--mono); color: var(--discret); }
+
+    #map { height: 55vh; min-height: 320px; border: 1px solid var(--trait); border-radius: 10px; }
+    .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.45); }
+    .leaflet-container { background: #1a1a1a; font-family: var(--mono); }
+
+    #journal { margin: 28px 0 0; padding: 0; list-style: none; border-left: 1px solid var(--trait); }
+    .etape { position: relative; padding: 4px 0 18px 22px; cursor: pointer; opacity: .55; }
+    .etape::before {
+      content: ''; position: absolute; left: -6px; top: 10px; width: 11px; height: 11px;
+      border-radius: 50%; background: var(--fond); border: 1px solid var(--discret);
+    }
+    .etape.fait { opacity: 1; }
+    .etape.fait::before { background: var(--accent); border-color: var(--accent); }
+    .etape .jour { font: 400 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--discret); }
+    .etape .trajet { font-size: 20px; margin: 2px 0; }
+    .etape .trajet i { color: var(--accent); font-style: normal; padding: 0 6px; }
+    .etape .meta { font: 400 13px var(--mono); color: var(--discret); }
+
+    #erreur { color: var(--accent); font: 14px var(--mono); }
+  </style>
+</head>
+<body>
+<main>
+  <header id="entete"></header>
+  <div id="erreur"></div>
+
+  <section class="stats">
+    <div class="stat"><b id="s-etapes">–</b><small>Étapes</small></div>
+    <div class="stat"><b id="s-km">–</b><small>Km parcourus</small></div>
+    <div class="stat"><b id="s-reste">–</b><small>Km restants</small></div>
+    <div class="stat"><b id="s-d">–</b><small>Dénivelé</small></div>
+  </section>
+  <div class="avance">
+    <div class="piste"><i id="barre"></i></div>
+    <span id="pct"></span>
+  </div>
+
+  <div id="map"></div>
+  <ol id="journal"></ol>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // ---- À remplir par toi (laisse vide pour ne rien afficher) ----
+  var TITRE = '';
+  var SOUS_TITRE = '';
+  // ---------------------------------------------------------------
+
+  var API = 'https://script.google.com/macros/s/AKfycbyptX2-OXsxh8yXqk9Hi_ygvcxP1_4vD0AT-KzZPcTFzR9AfEKHbQnBvgi3Pvw5a-LL/exec';
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return Number(n).toLocaleString('fr-FR'); };
+
+  var map = L.map('map', { scrollWheelZoom: false }).setView([46.6, 2.5], 5);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  var pistes = {};   // jour -> polyline
+  var etapesParJour = {};
+
+  if (TITRE) {
+    document.title = TITRE;
+    $('entete').innerHTML = '<h1></h1>' + (SOUS_TITRE ? '<p></p>' : '');
+    $('entete').querySelector('h1').textContent = TITRE;
+    if (SOUS_TITRE) $('entete').querySelector('p').textContent = SOUS_TITRE;
+  }
+
+  function afficherStats(t) {
+    $('s-etapes').textContent = t.jours_faits + ' / ' + t.jours;
+    $('s-km').textContent = fmt(t.km_faits);
+    $('s-reste').textContent = fmt(t.km_restants);
+    $('s-d').textContent = '+' + fmt(t.denivele_fait) + ' m';
+    $('pct').textContent = t.avancement + ' %';
+    setTimeout(function () { $('barre').style.width = t.avancement + '%'; }, 100);
+  }
+
+  function afficherJournal(etapes) {
+    var ol = $('journal');
+    etapes.forEach(function (e) {
+      etapesParJour[e.jour] = e;
+      var li = document.createElement('li');
+      li.className = 'etape' + (e.fait ? ' fait' : '');
+      li.innerHTML = '<div class="jour"></div><div class="trajet"></div><div class="meta"></div>';
+      li.querySelector('.jour').textContent = 'Jour ' + e.jour;
+      li.querySelector('.trajet').innerHTML = '<span></span><i>→</i><span></span>';
+      var sp = li.querySelectorAll('.trajet span');
+      sp[0].textContent = e.depart; sp[1].textContent = e.arrivee;
+      li.querySelector('.meta').textContent =
+        fmt(e.km) + ' km · D+ ' + fmt(e.denivele) + ' m · ' + e.temps;
+      li.addEventListener('click', function () { zoomer(e.jour); });
+      ol.appendChild(li);
+    });
+  }
+
+  function zoomer(jour) {
+    var e = etapesParJour[jour], cible = null;
+    if (pistes[jour]) cible = pistes[jour].getBounds();
+    else if (e && e.dep && e.arr) cible = L.latLngBounds([[e.dep.lat, e.dep.lng], [e.arr.lat, e.arr.lng]]);
+    if (!cible) return;
+    document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    map.fitBounds(cible, { padding: [30, 30] });
+  }
+
+  function afficherVilles(etapes) {
+    var villes = {};   // nom -> {lat,lng,atteinte}
+    etapes.forEach(function (e) {
+      [[e.depart, e.dep], [e.arrivee, e.arr]].forEach(function (c) {
+        if (!c[1]) return;
+        var v = villes[c[0]] || (villes[c[0]] = { lat: c[1].lat, lng: c[1].lng, atteinte: false });
+        if (e.fait) v.atteinte = true;
+      });
+    });
+    var pts = [];
+    Object.keys(villes).forEach(function (nom) {
+      var v = villes[nom];
+      pts.push([v.lat, v.lng]);
+      L.circleMarker([v.lat, v.lng], {
+        radius: v.atteinte ? 6 : 4,
+        color: v.atteinte ? '#e08a2e' : '#8f8470',
+        fillColor: v.atteinte ? '#e08a2e' : '#14110e',
+        fillOpacity: 1, weight: 1.5
+      }).addTo(map).bindTooltip(nom);
+    });
+    if (pts.length) map.fitBounds(pts, { padding: [30, 30] });
+  }
+
+  function lirePoints(txt) {
+    var xml = new DOMParser().parseFromString(txt, 'text/xml');
+    var pts = [].slice.call(xml.getElementsByTagName('trkpt'));
+    if (!pts.length) pts = [].slice.call(xml.getElementsByTagName('rtept'));
+    var pas = Math.max(1, Math.floor(pts.length / 500));
+    var ll = [];
+    pts.forEach(function (p, i) {
+      if (i % pas === 0 || i === pts.length - 1) ll.push([+p.getAttribute('lat'), +p.getAttribute('lon')]);
+    });
+    return ll;
+  }
+
+  function chargerPistes(etapes) {
+    var jours = etapes.filter(function (e) { return e.fait; }).map(function (e) { return e.jour; });
+    var i = 0;
+    function suivant() {
+      if (i >= jours.length) return;
+      var j = jours[i++];
+      fetch(API + '?gpx=' + j)
+        .then(function (r) { return r.text(); })
+        .then(function (txt) {
+          if (txt.indexOf('ERREUR:') === 0) return;
+          var ll = lirePoints(txt);
+          if (ll.length) pistes[j] = L.polyline(ll, { color: '#e08a2e', weight: 4, opacity: .95 }).addTo(map);
+        })
+        .catch(function () {})
+        .then(suivant);
+    }
+    for (var k = 0; k < 3; k++) suivant();
+  }
+
+  fetch(API + '?public=1')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.erreur) throw new Error(d.erreur);
+      afficherStats(d.totaux);
+      afficherJournal(d.etapes);
+      afficherVilles(d.etapes);
+      chargerPistes(d.etapes);
+    })
+    .catch(function (e) { $('erreur').textContent = 'Données indisponibles : ' + e.message; });
+</script>
+</body>
+</html>
