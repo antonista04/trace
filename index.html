@@ -773,13 +773,46 @@
     .prochaine-meta {
       font-size: 12px;
     }
+        .marque {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-right: 52px;
+    }
+    .marque img {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      border: 1px solid var(--trait);
+    }
+    .marque span {
+      font-weight: 600;
+      font-size: 20px;
+      letter-spacing: -0.01em;
+      color: var(--papier);
+    }
+    .marque em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .marque small {
+      font: 400 12px var(--mono);
+      color: var(--discret);
+      letter-spacing: 0.04em;
+      margin-left: 6px;
+    }
   </style>
 </head>
 <body>
 <main>
   <!-- Bouton de bascule de thème -->
   <button id="btn-theme" class="bouton-theme" type="button" aria-label="Thème" title="Thème"></button>
-
+  <div class="marque">
+    <img src="apple-touch-icon.png" alt="" width="36" height="36">
+    <span>Bivouac<em>88</em></span>
+    <small>Tour d'Europe à vélo</small>
+  </div>
   <header id="entete"></header>
   <div id="erreur"></div>
 
