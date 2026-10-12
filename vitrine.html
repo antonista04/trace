@@ -973,7 +973,7 @@
       });
       if (maxKmEtape) {
         $('s-max-km').textContent = fmtDec(maxKmEtape.km, 1) + ' km';
-        $('s-max-km-detail').textContent = 'Étape ' + maxKmEtape.jour + ' · ' + maxKmEtape.depart + ' → ' + maxKmEtape.arrivee;
+        $('s-max-km-detail').textContent = maxKmEtape.depart + ' → ' + maxKmEtape.arrivee;
       }
 
       // 3. Plus gros dénivelé
@@ -983,7 +983,7 @@
       });
       if (maxDEtape) {
         $('s-max-d').textContent = '+' + fmt(maxDEtape.denivele) + ' m';
-        $('s-max-d-detail').textContent = 'Étape ' + maxDEtape.jour + ' · ' + maxDEtape.depart + ' → ' + maxDEtape.arrivee;
+        $('s-max-d-detail').textContent = maxDEtape.depart + ' → ' + maxDEtape.arrivee;
       }
 
       // 4. Temps total de roulage estimé
