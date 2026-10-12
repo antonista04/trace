@@ -715,6 +715,42 @@
         padding-left: 0;
       }
     }
+        @media (min-width: 900px) {
+      .zone-carte-etapes {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        grid-template-areas:
+          "carte etapes"
+          "stats stats";
+        gap: 20px;
+        align-items: start;
+      }
+      .zone-carte-etapes .conteneur-carte {
+        grid-area: carte;
+        margin-bottom: 0;
+      }
+      .zone-carte-etapes .stats-secondaires {
+        grid-area: stats;
+        margin-bottom: 0;
+      }
+      .zone-carte-etapes .section-journal {
+        grid-area: etapes;
+        margin-top: 0;
+        height: 580px;
+        overflow-y: auto;
+        padding-right: 6px;
+      }
+      .zone-carte-etapes #map {
+        height: 580px;
+        max-height: none;
+      }
+      .journal-en-tete {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: var(--fond);
+      }
+    }
   </style>
 </head>
 <body>
