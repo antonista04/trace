@@ -1079,11 +1079,12 @@
     }
 
     // Indices visibles par défaut : toutes les étapes faites + les 3 suivantes
-    var maxIndexVisible = (premierIndexNonFait === -1)
-      ? etapes.length - 1
-      : premierIndexNonFait + 2;
+    var debutVisible = (premierIndexNonFait === -1)
+      ? Math.max(0, etapes.length - 4)
+      : premierIndexNonFait;
+    var finVisible = debutVisible + 3;
 
-    var ilYaDesEtapesMasquees = maxIndexVisible < etapes.length - 1;
+    var ilYaDesEtapesMasquees = false;
 
     etapes.forEach(function (e, index) {
       etapesParJour[e.jour] = e;
@@ -1094,7 +1095,7 @@
       if (e.fait) classe += ' fait';
       if (estProchaine) classe += ' prochaine-liste';
 
-      var estMasquee = !etapesDepliees && (index > maxIndexVisible);
+      var estMasquee = (index < debutVisible || index > finVisible);
       if (estMasquee) classe += ' etape-masquee';
 
       li.className = classe;
