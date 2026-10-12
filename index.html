@@ -858,7 +858,7 @@
     });
   }
 
-  // ---- À remplir par toi (laisse vide pour ne rien afficher) ----
+  // ---- À remplir (laisse vide pour ne rien afficher) ----
   var TITRE = '';
   var SOUS_TITRE = '';
   // ---------------------------------------------------------------
@@ -891,7 +891,7 @@
     if (SOUS_TITRE) $('entete').querySelector('p').textContent = SOUS_TITRE;
   }
 
-  // Parse les temps sous forme "5 h 42", "4 h 07", "4h30", "4:30"
+  // Passe les temps sous forme "5 h 42", "4 h 07", "4h30", "4:30"
   function parseMinutes(str) {
     if (!str) return 0;
     var m = String(str).match(/(\d+)\s*(?:h|:)\s*(\d+)?/i);
