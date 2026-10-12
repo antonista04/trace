@@ -71,16 +71,16 @@
     }
 
     html {
-      background: (--fond);
+      background: var(--fond);
       scroll-behavior: smooth;
       transition: background-color 0.2s ease;
     }
 
     body {
       margin: 0;
-      color: (--papier);
-      background: (--fond);
-      font-family: (--serif);
+      color: var(--papier);
+      background: var(--fond);
+      font-family: var(--serif);
       font-size: 16px;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
@@ -117,19 +117,19 @@
       justify-content: center;
       width: 36px;
       height: 36px;
-      background: (--carte);
-      border: 1px solid (--trait);
+      background: var(--carte);
+      border: 1px solid var(--trait);
       border-radius: 9px;
-      color: (--papier);
+      color: var(--papier);
       cursor: pointer;
       transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
     .bouton-theme:hover {
-      background: (--carte-hover);
-      border-color: (--trait-actif);
-      color: (--accent);
+      background: var(--carte-hover);
+      border-color: var(--trait-actif);
+      color: var(--accent);
     }
     .bouton-theme:active {
       transform: scale(0.92);
@@ -147,27 +147,27 @@
     #entete {
       margin-bottom: 24px;
       padding-bottom: 20px;
-      border-bottom: 1px solid (--trait-subtil);
+      border-bottom: 1px solid var(--trait-subtil);
     }
     #entete h1 {
       font-weight: 600;
       font-size: clamp(26px, 5vw, 42px);
       letter-spacing: -0.02em;
-      color: (--papier);
+      color: var(--papier);
       line-height: 1.15;
     }
     #entete p {
       margin-top: 8px;
-      color: (--discret);
-      font-family: (--mono);
+      color: var(--discret);
+      font-family: var(--mono);
       font-size: 14px;
     }
 
     /* Carte Prochaine étape */
     .prochaine-carte {
       display: none;
-      background: (--carte-prochaine);
-      border: 1px solid (--accent-trait);
+      background: var(--carte-prochaine);
+      border: 1px solid var(--accent-trait);
       border-radius: 12px;
       padding: 16px 48px 16px 18px;
       margin-bottom: 16px;
@@ -177,8 +177,8 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
     .prochaine-carte:hover {
-      background: (--carte-hover);
-      border-color: (--accent);
+      background: var(--carte-hover);
+      border-color: var(--accent);
     }
     .prochaine-carte:active {
       transform: scale(0.995);
@@ -187,10 +187,10 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font: 500 11px (--mono);
+      font: 500 11px var(--mono);
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: (--accent);
+      color: var(--accent);
       margin-bottom: 6px;
     }
     .prochaine-etiquette::before {
@@ -199,13 +199,13 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: (--accent);
-      box-shadow: 0 0 8px (--accent);
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
     }
     .prochaine-trajet {
       font-size: clamp(19px, 3.2vw, 24px);
       font-weight: 600;
-      color: (--papier);
+      color: var(--papier);
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -214,9 +214,9 @@
       line-height: 1.25;
     }
     .prochaine-trajet i {
-      color: (--accent);
+      color: var(--accent);
       font-style: normal;
-      font-family: (--mono);
+      font-family: var(--mono);
       font-weight: 400;
     }
     .prochaine-meta {
