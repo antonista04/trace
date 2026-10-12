@@ -1088,9 +1088,9 @@
 
     // Indices visibles par défaut : toutes les étapes faites + les 3 suivantes
     var debutVisible = (premierIndexNonFait === -1)
-      ? Math.max(0, etapes.length - 5)
+      ? Math.max(0, etapes.length - 4)
       : premierIndexNonFait;
-    var finVisible = debutVisible + 4;
+    var finVisible = debutVisible + 3;
 
     var ilYaDesEtapesMasquees = false;
     var flecheSuite = $('fleche-suite');
