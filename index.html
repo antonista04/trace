@@ -751,6 +751,13 @@
         background: var(--fond);
       }
     }
+      .fleche-suite {
+      text-align: center;
+      font: 400 20px var(--mono);
+      color: var(--accent);
+      opacity: 0.7;
+      margin-top: 6px;
+    }  
   </style>
 </head>
 <body>
@@ -847,6 +854,7 @@
       <span id="journal-compteur"></span>
     </div>
     <ol id="journal"></ol>
+    <div id="fleche-suite" class="fleche-suite" aria-hidden="true">↓</div>
     <div id="zone-deplier" class="zone-deplier" style="display: none;">
       <button id="btn-deplier" class="bouton-deplier" type="button">
         <span id="btn-deplier-texte">Voir tout</span>
@@ -1080,11 +1088,15 @@
 
     // Indices visibles par défaut : toutes les étapes faites + les 3 suivantes
     var debutVisible = (premierIndexNonFait === -1)
-      ? Math.max(0, etapes.length - 4)
+      ? Math.max(0, etapes.length - 5)
       : premierIndexNonFait;
-    var finVisible = debutVisible + 3;
+    var finVisible = debutVisible + 4;
 
     var ilYaDesEtapesMasquees = false;
+    var flecheSuite = $('fleche-suite');
+    if (flecheSuite) {
+      flecheSuite.style.display = (finVisible < etapes.length - 1) ? 'block' : 'none';
+    }
 
     etapes.forEach(function (e, index) {
       etapesParJour[e.jour] = e;
