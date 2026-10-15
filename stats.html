@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Stats · Bivouac88</title>
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#e58e26">
+  <script>
+    (function () {
+      var stocke = null;
+      try { stocke = localStorage.getItem('theme'); } catch (e) {}
+      var theme = stocke || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fond: #12100e;
+      --carte: #1b1612;
+      --carte-hover: #231d17;
+      --trait: #342a22;
+      --trait-subtil: #251e18;
+      --trait-actif: #5c4a3b;
+      --papier: #f2ebd9;
+      --discret: #9c907b;
+      --discret-sombre: #665c4c;
+      --accent: #e58e26;
+      --accent-fond: rgba(229, 142, 38, 0.12);
+      --accent-trait: rgba(229, 142, 38, 0.35);
+      --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+      --mono: 'IBM Plex Mono', 'Courier New', monospace;
+    }
+    [data-theme="light"] {
+      --fond: #f7f3eb;
+      --carte: #ede7dc;
+      --carte-hover: #e4dccf;
+      --trait: #d6ccbe;
+      --trait-subtil: #e5dccf;
+      --trait-actif: #b8ab9a;
+      --papier: #2c241c;
+      --discret: #7d7263;
+      --discret-sombre: #a69a8b;
+      --accent: #d47b19;
+      --accent-fond: rgba(212, 123, 25, 0.12);
+      --accent-trait: rgba(212, 123, 25, 0.35);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: var(--fond); scroll-behavior: smooth; }
+    body {
+      color: var(--papier);
+      background: var(--fond);
+      font-family: var(--serif);
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    main { max-width: 900px; margin: 0 auto; padding: 18px 16px 64px; position: relative; }
+    @media (min-width: 768px) { main { padding: 24px 24px 64px; } }
+
+    .ligne-haut {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-right: 48px;
+    }
+    .marque {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .marque img { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--trait); }
+    .marque span { font-weight: 600; font-size: 18px; letter-spacing: -0.01em; color: var(--papier); }
+    .marque em { font-style: normal; color: var(--accent); }
+    .retour {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--discret);
+      font: 500 12px var(--mono);
+      letter-spacing: 0.04em;
+      border: 1px solid var(--trait);
+      border-radius: 8px;
+      padding: 7px 12px;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .retour:hover { color: var(--accent); border-color: var(--accent-trait); }
+
+    .bouton-theme {
+      position: absolute;
+      top: 18px;
+      right: 16px;
+      z-index: 100;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 9px;
+      color: var(--papier);
+      cursor: pointer;
+    }
+    .bouton-theme svg { width: 17px; height: 17px; display: block; }
+
+    h1.titre-page {
+      font-size: clamp(24px, 4vw, 32px);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .sous-titre-page {
+      color: var(--discret);
+      font: 400 13px var(--mono);
+      margin-bottom: 20px;
+    }
+
+    /* Sections */
+    .section { margin-bottom: 30px; }
+    h2.titre-section {
+      font-size: clamp(16px, 2.5vw, 19px);
+      font-weight: 600;
+      margin: 0 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--trait-subtil);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    h2.titre-section small { font: 400 12px var(--mono); color: var(--discret); }
+
+    .grille {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (min-width: 640px) {
+      .grille { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    }
+
+    /* Cases de stats */
+    .stat-boite, .carte-stat {
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 84px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .carte-stat { padding: 12px 14px; min-height: 80px; }
+    .stat-boite small, .carte-stat small {
+      font: 400 11px var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--discret);
+      margin-bottom: 4px;
+      display: block;
+    }
+    .stat-boite b, .carte-stat b {
+      display: block;
+      font-weight: 600;
+      color: var(--papier);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+    }
+    .stat-boite b { font-size: clamp(22px, 3.5vw, 28px); }
+    .carte-stat b { font-size: clamp(18px, 2.5vw, 22px); }
+    .stat-boite .detail, .carte-stat .detail {
+      font: 400 11px var(--mono);
+      color: var(--discret);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    a.stat-boite { position: relative; transition: border-color 0.2s ease, background-color 0.2s ease; }
+    a.stat-boite:hover { border-color: var(--accent-trait); background: var(--carte-hover); }
+    a.stat-boite::after {
+      content: '›';
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font: 400 16px var(--mono);
+      color: var(--discret-sombre);
+    }
+    a.stat-boite:hover::after { color: var(--accent); }
+    a.stat-boite:focus-visible, .bouton-lien:focus-visible, .barre-col:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Progression */
+    .piste-avance {
+      height: 6px;
+      background: var(--trait-subtil);
+      border: 1px solid var(--trait);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+    .barre-progression {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #c97519, #f09a34);
+      border-radius: 999px;
+      transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .avance-infos {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font: 400 12px var(--mono);
+      color: var(--discret);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Graphiques en barres */
+    .graphique {
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 12px;
+      padding: 14px 14px 10px;
+    }
+    .barres-defilement { overflow-x: auto; padding-bottom: 4px; }
+    .barres {
+      display: flex;
+      gap: 3px;
+      min-width: 100%;
+      width: max-content;
+    }
+    .barre-col {
+      flex: 1 0 18px;
+      min-width: 18px;
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      color: inherit;
+      font: inherit;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .barre-zone {
+      height: 140px;
+      display: flex;
+      align-items: flex-end;
+    }
+    .barre-val {
+      display: block;
+      width: 100%;
+      border-radius: 3px 3px 0 0;
+      background: var(--trait-actif);
+      opacity: 0.55;
+      transition: opacity 0.15s ease;
+    }
+    .barre-col.fait .barre-val { background: var(--accent); opacity: 0.9; }
+    .barre-col:hover .barre-val, .barre-col.actif .barre-val { opacity: 1; }
+    .barre-col.actif .barre-val { box-shadow: 0 0 0 2px var(--papier); }
+    .barre-num {
+      display: block;
+      margin-top: 4px;
+      font: 400 10px var(--mono);
+      color: var(--discret);
+      text-align: center;
+    }
+    .graphique-info {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--trait-subtil);
+      font: 400 12px var(--mono);
+      color: var(--discret);
+      min-height: 30px;
+    }
+    .graphique-info strong { color: var(--papier); font-weight: 500; }
+    .legende {
+      display: flex;
+      gap: 14px;
+      margin-top: 10px;
+      font: 400 11px var(--mono);
+      color: var(--discret);
+    }
+    .legende i {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      margin-right: 5px;
+      vertical-align: baseline;
+    }
+
+    .bouton-lien {
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 13px 20px;
+      text-align: center;
+      text-decoration: none;
+      background: var(--carte);
+      border: 1px solid var(--trait);
+      border-radius: 10px;
+      color: var(--papier);
+      font: 500 13px var(--mono);
+      letter-spacing: 0.04em;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .bouton-lien:hover { background: var(--carte-hover); border-color: var(--trait-actif); }
+
+    #erreur {
+      color: var(--accent);
+      font: 14px var(--mono);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      background: var(--accent-fond);
+      border: 1px solid var(--accent-trait);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .pied {
+      margin-top: 28px;
+      text-align: center;
+      font: 400 11px var(--mono);
+      letter-spacing: 0.1em;
+      color: var(--discret-sombre);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .barre-progression { transition: none; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <button id="btn-theme" class="bouton-theme" type="button" aria-label="Thème" title="Thème"></button>
+
+  <div class="ligne-haut">
+    <a class="marque" href="index.html">
+      <img src="apple-touch-icon.png" alt="">
+      <span>Bivouac<em>88</em></span>
+    </a>
+    <a class="retour" href="index.html">← Retour</a>
+  </div>
+
+  <h1 class="titre-page">Toutes les stats</h1>
+  <p class="sous-titre-page" id="sous-titre">chargement…</p>
+
+  <div id="erreur"></div>
+
+  <section class="section">
+    <h2 class="titre-section">Progression</h2>
+    <div class="grille" id="grille-principales"></div>
+    <div class="piste-avance"><i id="barre" class="barre-progression"></i></div>
+    <div class="avance-infos">
+      <span id="pct">0 %</span>
+      <span id="avance-resume"></span>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="titre-section">Moyennes</h2>
+    <div class="grille" id="grille-moyennes"></div>
+  </section>
+
+  <section class="section">
+    <h2 class="titre-section">Records</h2>
+    <div class="grille" id="grille-records"></div>
+  </section>
+
+  <section class="section">
+    <h2 class="titre-section">Temps de roulage</h2>
+    <div class="grille" id="grille-temps"></div>
+  </section>
+
+  <section class="section">
+    <h2 class="titre-section">Distance par étape <small>km</small></h2>
+    <div class="graphique">
+      <div class="barres-defilement"><div class="barres" id="graph-km"></div></div>
+      <div class="graphique-info" id="info-km">Touche ou survole une barre pour voir l'étape.</div>
+      <div class="legende"><span><i style="background: var(--accent)"></i>Faite</span><span><i style="background: var(--trait-actif)"></i>À venir</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="titre-section">Dénivelé par étape <small>m</small></h2>
+    <div class="graphique">
+      <div class="barres-defilement"><div class="barres" id="graph-d"></div></div>
+      <div class="graphique-info" id="info-d">Touche ou survole une barre pour voir l'étape.</div>
+      <div class="legende"><span><i style="background: var(--accent)"></i>Faite</span><span><i style="background: var(--trait-actif)"></i>À venir</span></div>
+    </div>
+  </section>
+
+  <a class="bouton-lien" href="etapes.html">Voir toutes les étapes</a>
+
+  <footer class="pied">Bivouac88 · Hodl jusqu'au bout</footer>
+</main>
+
+<script>
+  // ---- Thème ----
+  var iconeSoleil = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
+  var iconeLune = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  function majBoutonTheme(theme) {
+    var btn = document.getElementById('btn-theme');
+    if (btn) btn.innerHTML = (theme === 'light') ? iconeLune : iconeSoleil;
+  }
+  function appliquerTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('theme', theme); } catch (e) {}
+    majBoutonTheme(theme);
+  }
+  majBoutonTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+  document.getElementById('btn-theme').onclick = function () {
+    var actuel = document.documentElement.getAttribute('data-theme') || 'dark';
+    appliquerTheme(actuel === 'light' ? 'dark' : 'light');
+  };
+
+  // ---- Outils ----
+  var API = 'https://script.google.com/macros/s/AKfycbyptX2-OXsxh8yXqk9Hi_ygvcxP1_4vD0AT-KzZPcTFzR9AfEKHbQnBvgi3Pvw5a-LL/exec';
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return Number(n || 0).toLocaleString('fr-FR'); };
+  var fmtDec = function (n, d) {
+    return Number(n || 0).toLocaleString('fr-FR', {
+      minimumFractionDigits: d !== undefined ? d : 1,
+      maximumFractionDigits: d !== undefined ? d : 1
+    });
+  };
+  var pluriel = function (n, mot) { return n + ' ' + mot + (n > 1 ? 's' : ''); };
+
+  function parseMinutes(str) {
+    if (!str) return 0;
+    var m = String(str).match(/(\d+)\s*(?:h|:)\s*(\d+)?/i);
+    if (m) return (parseInt(m[1], 10) || 0) * 60 + (parseInt(m[2], 10) || 0);
+    var num = parseFloat(str);
+    return isNaN(num) ? 0 : Math.round(num * 60);
+  }
+  function formaterDuree(min) {
+    min = Math.round(min);
+    var h = Math.floor(min / 60), r = min % 60;
+    if (r === 0) return h + ' h';
+    return h + ' h ' + (r < 10 ? '0' : '') + r;
+  }
+
+  function creer(tag, classe, texte) {
+    var el = document.createElement(tag);
+    if (classe) el.className = classe;
+    if (texte !== undefined) el.textContent = texte;
+    return el;
+  }
+
+  // Une case de stats (href => la case devient un lien)
+  function carte(label, valeur, detail, classe, href) {
+    var el = creer(href ? 'a' : 'div', classe);
+    if (href) el.href = href;
+    el.appendChild(creer('small', '', label));
+    el.appendChild(creer('b', '', valeur));
+    el.appendChild(creer('div', 'detail', detail || ''));
+    return el;
+  }
+
+  function trajet(e) {
+    return e ? ('Étape ' + e.jour + ' · ' + e.depart + ' → ' + e.arrivee) : '';
+  }
+
+  // Étape avec la plus grande (ou petite) valeur > 0
+  function extreme(etapes, f, plusGrand) {
+    var meilleure = null;
+    etapes.forEach(function (e) {
+      var v = f(e);
+      if (!(v > 0)) return;
+      if (meilleure === null || (plusGrand ? v > f(meilleure) : v < f(meilleure))) meilleure = e;
+    });
+    return meilleure;
+  }
+  var kmDe = function (e) { return Number(e.km) || 0; };
+  var denDe = function (e) { return Number(e.denivele) || 0; };
+  var minDe = function (e) { return parseMinutes(e.temps); };
+  var somme = function (liste, f) { return liste.reduce(function (a, e) { return a + f(e); }, 0); };
+
+  function afficherStats(t, etapes) {
+    var total = t.jours || etapes.length;
+    var faits = t.jours_faits || 0;
+    var restants = Math.max(0, total - faits);
+
+    $('sous-titre').textContent = faits + ' / ' + total + ' étapes · ' + t.avancement + ' % du parcours';
+
+    // --- Progression ---
+    var gp = $('grille-principales');
+    gp.appendChild(carte('Étapes', faits + ' / ' + total, pluriel(restants, 'restante'), 'stat-boite', 'etapes.html'));
+    gp.appendChild(carte('Km parcourus', fmt(t.km_faits) + ' km', t.km_total ? 'sur ' + fmt(t.km_total) + ' km' : '', 'stat-boite'));
+    gp.appendChild(carte('Km restants', fmt(t.km_restants) + ' km', pluriel(restants, 'étape'), 'stat-boite'));
+    gp.appendChild(carte('Dénivelé', '+' + fmt(t.denivele_fait) + ' m', t.denivele_total ? 'sur +' + fmt(t.denivele_total) + ' m' : '', 'stat-boite'));
+
+    $('pct').textContent = t.avancement + ' %';
+    if (t.km_total) $('avance-resume').textContent = fmt(t.km_faits) + ' / ' + fmt(t.km_total) + ' km';
+    setTimeout(function () { $('barre').style.width = t.avancement + '%'; }, 100);
+
+    if (!etapes.length) return;
+
+    var kmTotal = somme(etapes, kmDe);
+    var denTotal = somme(etapes, denDe);
+    var minTotal = somme(etapes, minDe);
+    var faites = etapes.filter(function (e) { return e.fait; });
+    var minFait = somme(faites, minDe);
+
+    // --- Moyennes ---
+    var gm = $('grille-moyennes');
+    gm.appendChild(carte('Km / étape', fmtDec(kmTotal / etapes.length, 1) + ' km', 'sur ' + etapes.length + ' étapes', 'carte-stat'));
+    gm.appendChild(carte('Dénivelé / étape', '+' + fmt(Math.round(denTotal / etapes.length)) + ' m', 'sur ' + etapes.length + ' étapes', 'carte-stat'));
+    gm.appendChild(carte('Durée / étape', formaterDuree(minTotal / etapes.length), 'temps estimé', 'carte-stat'));
+    gm.appendChild(carte('Dénivelé / 100 km', '+' + fmt(kmTotal ? Math.round(denTotal / kmTotal * 100) : 0) + ' m', 'sur tout le parcours', 'carte-stat'));
+
+    // --- Records ---
+    var gr = $('grille-records');
+    var plusLongue = extreme(etapes, kmDe, true);
+    var plusCourte = extreme(etapes, kmDe, false);
+    var plusGrosD = extreme(etapes, denDe, true);
+    var plusPetitD = extreme(etapes, denDe, false);
+    if (plusLongue) gr.appendChild(carte('Plus longue étape', fmtDec(plusLongue.km, 1) + ' km', trajet(plusLongue), 'carte-stat'));
+    if (plusCourte) gr.appendChild(carte('Plus courte étape', fmtDec(plusCourte.km, 1) + ' km', trajet(plusCourte), 'carte-stat'));
+    if (plusGrosD) gr.appendChild(carte('Plus gros dénivelé', '+' + fmt(plusGrosD.denivele) + ' m', trajet(plusGrosD), 'carte-stat'));
+    if (plusPetitD) gr.appendChild(carte('Plus petit dénivelé', '+' + fmt(plusPetitD.denivele) + ' m', trajet(plusPetitD), 'carte-stat'));
+
+    // --- Temps ---
+    var gt = $('grille-temps');
+    var plusLongueDuree = extreme(etapes, minDe, true);
+    gt.appendChild(carte('Temps total estimé', formaterDuree(minTotal), pluriel(etapes.length, 'étape'), 'carte-stat'));
+    gt.appendChild(carte('Déjà roulé', formaterDuree(minFait), pluriel(faites.length, 'étape') + ' faite' + (faites.length > 1 ? 's' : ''), 'carte-stat'));
+    gt.appendChild(carte('Reste à rouler', formaterDuree(minTotal - minFait), pluriel(restants, 'étape') + ' restante' + (restants > 1 ? 's' : ''), 'carte-stat'));
+    if (plusLongueDuree) gt.appendChild(carte('Plus longue durée', formaterDuree(minDe(plusLongueDuree)), trajet(plusLongueDuree), 'carte-stat'));
+
+    // --- Graphiques ---
+    graphique('graph-km', 'info-km', etapes, kmDe, function (v) { return fmtDec(v, 1) + ' km'; });
+    graphique('graph-d', 'info-d', etapes, denDe, function (v) { return '+' + fmt(v) + ' m'; });
+  }
+
+  function graphique(idBarres, idInfo, etapes, valeurDe, formater) {
+    var zone = $(idBarres), info = $(idInfo);
+    var max = 0;
+    etapes.forEach(function (e) { if (valeurDe(e) > max) max = valeurDe(e); });
+    var colActive = null;
+
+    function afficherInfo(e, col) {
+      if (colActive) colActive.classList.remove('actif');
+      colActive = col;
+      col.classList.add('actif');
+      info.textContent = '';
+      info.appendChild(creer('strong', '', trajet(e)));
+      info.appendChild(document.createTextNode(' · ' + formater(valeurDe(e)) + (e.fait ? ' · faite' : ' · à venir')));
+    }
+
+    etapes.forEach(function (e) {
+      var col = creer('button', 'barre-col' + (e.fait ? ' fait' : ''));
+      col.type = 'button';
+      col.title = trajet(e) + ' · ' + formater(valeurDe(e));
+      var z = creer('span', 'barre-zone');
+      var b = creer('span', 'barre-val');
+      b.style.height = (max ? Math.max(2, valeurDe(e) / max * 100) : 0) + '%';
+      z.appendChild(b);
+      col.appendChild(z);
+      col.appendChild(creer('span', 'barre-num', e.jour));
+      col.addEventListener('click', function () { afficherInfo(e, col); });
+      col.addEventListener('mouseenter', function () { afficherInfo(e, col); });
+      zone.appendChild(col);
+    });
+  }
+
+  fetch(API + '?public=1')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.erreur) throw new Error(d.erreur);
+      afficherStats(d.totaux, d.etapes);
+    })
+    .catch(function (e) {
+      var errEl = $('erreur');
+      errEl.style.display = 'block';
+      errEl.textContent = 'Données indisponibles : ' + e.message;
+      $('sous-titre').textContent = '';
+    });
+</script>
+</body>
+</html>
