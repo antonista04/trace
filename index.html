@@ -879,6 +879,41 @@
         top: 18px;
       }
     }
+        .stat-boite.cliquable, .stat-secondaire.cliquable {
+      position: relative;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .stat-boite.cliquable:hover, .stat-secondaire.cliquable:hover {
+      border-color: var(--accent-trait);
+      background: var(--carte-hover);
+    }
+    .stat-boite.cliquable:active, .stat-secondaire.cliquable:active {
+      transform: scale(0.99);
+    }
+    .stat-boite.cliquable:focus-visible, .stat-secondaire.cliquable:focus-visible,
+    a.fleche-suite:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .stat-boite.cliquable::after, .stat-secondaire.cliquable::after {
+      content: '›';
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font: 400 16px var(--mono);
+      color: var(--discret-sombre);
+    }
+    .stat-boite.cliquable:hover::after, .stat-secondaire.cliquable:hover::after {
+      color: var(--accent);
+    }
+    a.fleche-suite {
+      display: block;
+      text-decoration: none;
+      padding: 6px 0;
+      transition: opacity 0.15s ease;
+    }
+    a.fleche-suite:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -980,7 +1015,7 @@
       <span id="journal-compteur"></span>
     </div>
     <ol id="journal"></ol>
-    <div id="fleche-suite" class="fleche-suite" aria-hidden="true">↓</div>
+    <a id="fleche-suite" class="fleche-suite" href="etapes.html" aria-label="Voir toutes les étapes" title="Voir toutes les étapes">↓</a>
     <div id="zone-deplier" class="zone-deplier" style="display: none;">
       <button id="btn-deplier" class="bouton-deplier" type="button">
         <span id="btn-deplier-texte">Voir tout</span>
@@ -1222,7 +1257,7 @@
     var ilYaDesEtapesMasquees = false;
     var flecheSuite = $('fleche-suite');
     if (flecheSuite) {
-      flecheSuite.style.display = (finVisible < etapes.length - 1) ? 'block' : 'none';
+      flecheSuite.style.display = 'block';
     }
 
     etapes.forEach(function (e, index) {
@@ -1424,7 +1459,23 @@
     }
     for (var k = 0; k < 3; k++) suivant();
   }
-
+  // ---- Cases de stats cliquables ----
+  function rendreCliquable(el, url) {
+    el.setAttribute('role', 'link');
+    el.setAttribute('tabindex', '0');
+    el.classList.add('cliquable');
+    el.addEventListener('click', function () { window.location.href = url; });
+    el.addEventListener('keydown', function (evt) {
+      if (evt.key === 'Enter' || evt.key === ' ') {
+        evt.preventDefault();
+        window.location.href = url;
+      }
+    });
+  }
+  document.querySelectorAll('.stat-boite, .stat-secondaire').forEach(function (el) {
+    // La case « Étapes » (3/29) va vers les étapes, toutes les autres vers les stats
+    rendreCliquable(el, el.querySelector('#s-etapes') ? 'etapes.html' : 'stats.html');
+  });
   // Récupération des données publiques
   fetch(API + '?public=1')
     .then(function (r) { return r.json(); })
