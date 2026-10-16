@@ -349,8 +349,9 @@
 if (photos.length) {
   html += '<div class="galerie-photos">';
   photos.forEach(function (url, i) {
-    html += '<img class="avis-photo" src="' + url + '" alt="Photo ' + (i + 1) + '" loading="lazy" onclick="ouvrirLightbox(\'' + url + '\')">';
-  });
+  html += '<img class="avis-photo" src="' + url + '" alt="Photo ' + (i + 1) + '" loading="lazy" style="cursor:pointer" onclick="ouvrirLightbox(this.dataset.original)" data-original="' + url + '">';
+});
+
   html += '</div>';
 }
         html += '</div></div>';
@@ -373,10 +374,12 @@ if (photos.length) {
       errEl.textContent = 'Données indisponibles : ' + e.message;
       $('compteur-page').textContent = '';
     });
-  function ouvrirLightbox(url) {
-  document.getElementById('lightbox-img').src = base + '=s0';
+function ouvrirLightbox(url) {
+  var img = document.getElementById('lightbox-img');
+  img.src = url;
   document.getElementById('lightbox').classList.add('active');
 }
+
 document.getElementById('lightbox').onclick = function() {
   this.classList.remove('active');
   document.getElementById('lightbox-img').src = '';
