@@ -374,7 +374,9 @@ if (photos.length) {
       $('compteur-page').textContent = '';
     });
   function ouvrirLightbox(url) {
-  document.getElementById('lightbox-img').src = url;
+  // Forcer la haute résolution pour Google Drive
+  var urlHD = url.replace('=s220', '').replace('=s400', '').replace('=s800', '');
+  document.getElementById('lightbox-img').src = urlHD;
   document.getElementById('lightbox').classList.add('active');
 }
 document.getElementById('lightbox').onclick = function() {
