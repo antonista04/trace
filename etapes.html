@@ -10,6 +10,14 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="theme-color" content="#e58e26">
   <script>
+    function ouvrirLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox').classList.add('active');
+}
+document.getElementById('lightbox').onclick = function() {
+  this.classList.remove('active');
+  document.getElementById('lightbox-img').src = '';
+};
     (function () {
       var stocke = null;
       try { stocke = localStorage.getItem('theme'); } catch (e) {}
@@ -231,6 +239,25 @@
       letter-spacing: 0.1em;
       color: var(--discret-sombre);
     }
+    .lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.85);
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+.lightbox.active {
+  display: flex;
+}
+.lightbox img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 10px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
   </style>
 </head>
 <body>
@@ -252,6 +279,9 @@
   <ol id="journal"></ol>
 
   <footer class="pied">Bivouac88 · Hodl till I die</footer>
+<div id="lightbox" class="lightbox">
+  <img id="lightbox-img" src="" alt="">
+</div>
 </main>
 
 <script>
@@ -334,7 +364,7 @@
 if (photos.length) {
   html += '<div class="galerie-photos">';
   photos.forEach(function (url, i) {
-    html += '<a href="' + url + '" target="_blank" rel="noopener"><img class="avis-photo" src="' + url + '" alt="Photo ' + (i + 1) + '" loading="lazy"></a>';
+    html += '<img class="avis-photo" src="' + url + '" alt="Photo ' + (i + 1) + '" loading="lazy" onclick="ouvrirLightbox(\'' + url + '\')">';
   });
   html += '</div>';
 }
