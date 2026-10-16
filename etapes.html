@@ -307,7 +307,7 @@
           html += '<div class="avis-commentaire">' + e.note.commentaire + '</div>';
         }
         if (e.note.photo) {
-          html += '<img class="avis-photo" src="' + e.note.photo + '" alt="Photo de l\'étape ' + e.jour + '" loading="lazy">';
+          html += '<img class="avis-photo" crossorigin="anonymous" referrerpolicy="no-referrer" src="' + e.note.photo + '" alt="Photo de l\'étape ' + e.jour + '" loading="lazy">';
         }
         html += '</div></div>';
       }
