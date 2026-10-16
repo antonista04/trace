@@ -10,14 +10,6 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="theme-color" content="#e58e26">
   <script>
-    function ouvrirLightbox(url) {
-  document.getElementById('lightbox-img').src = url;
-  document.getElementById('lightbox').classList.add('active');
-}
-document.getElementById('lightbox').onclick = function() {
-  this.classList.remove('active');
-  document.getElementById('lightbox-img').src = '';
-};
     (function () {
       var stocke = null;
       try { stocke = localStorage.getItem('theme'); } catch (e) {}
@@ -214,13 +206,6 @@ document.getElementById('lightbox').onclick = function() {
 .galerie-photos .avis-photo:hover {
   opacity: 0.8;
 }
-      margin-top: 10px;
-      max-width: 100%;
-      border-radius: 10px;
-      border: 1px solid var(--trait);
-      display: block;
-    }
-
     #erreur {
       color: var(--accent);
       font: 14px var(--mono);
@@ -388,6 +373,14 @@ if (photos.length) {
       errEl.textContent = 'Données indisponibles : ' + e.message;
       $('compteur-page').textContent = '';
     });
+  function ouvrirLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox').classList.add('active');
+}
+document.getElementById('lightbox').onclick = function() {
+  this.classList.remove('active');
+  document.getElementById('lightbox-img').src = '';
+};
 </script>
 </body>
 </html>
