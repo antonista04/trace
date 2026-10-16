@@ -334,7 +334,7 @@
 if (photos.length) {
   html += '<div class="galerie-photos">';
   photos.forEach(function (url, i) {
-    html += '<img class="avis-photo" src="' + url + '" alt="Photo ' + (i + 1) + ' de l\'étape ' + e.jour + '" loading="lazy">';
+    html += '<a href="' + url + '" target="_blank" rel="noopener"><img class="avis-photo" src="' + url + '" alt="Photo ' + (i + 1) + '" loading="lazy"></a>';
   });
   html += '</div>';
 }
