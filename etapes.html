@@ -181,23 +181,24 @@
     .avis-smiley { font-size: 28px; line-height: 1; flex-shrink: 0; }
     .avis-texte { flex: 1; min-width: 0; }
     .avis-commentaire { color: var(--papier); font-size: 14px; line-height: 1.5; }
-    .avis-photo {
+        .avis-photo {
       margin-top: 10px;
       max-width: 100%;
       border-radius: 10px;
       border: 1px solid var(--trait);
       display: block;
     }
-        .galerie-photos {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-        .galerie-photos .avis-photo {
+    .galerie-photos {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .galerie-photos .avis-photo {
       margin-top: 0;
-      width: 500%;
-      margin-bottom: 8px;
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
       border-radius: 10px;
       display: block;
     }
