@@ -182,6 +182,18 @@
     .avis-texte { flex: 1; min-width: 0; }
     .avis-commentaire { color: var(--papier); font-size: 14px; line-height: 1.5; }
     .avis-photo {
+      .galerie-photos {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+.galerie-photos .avis-photo {
+  margin-top: 0;
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
       margin-top: 10px;
       max-width: 100%;
       border-radius: 10px;
@@ -307,9 +319,13 @@
           html += '<div class="avis-commentaire">' + e.note.commentaire + '</div>';
         }
         var photos = [e.note.photo, e.note.photo2, e.note.photo3, e.note.photo4].filter(Boolean);
-photos.forEach(function (url, i) {
-  html += '<img class="avis-photo" src="' + url + '" alt="Photo ' + (i + 1) + ' de l\'étape ' + e.jour + '" loading="lazy">';
-});
+if (photos.length) {
+  html += '<div class="galerie-photos">';
+  photos.forEach(function (url, i) {
+    html += '<img class="avis-photo" src="' + url + '" alt="Photo ' + (i + 1) + ' de l\'étape ' + e.jour + '" loading="lazy">';
+  });
+  html += '</div>';
+}
         html += '</div></div>';
       }
 
