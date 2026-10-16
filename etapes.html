@@ -349,8 +349,10 @@
 if (photos.length) {
   html += '<div class="galerie-photos">';
   photos.forEach(function (url, i) {
-  html += '<img class="avis-photo" src="' + url + '" alt="Photo ' + (i + 1) + '" loading="lazy" style="cursor:pointer" onclick="ouvrirLightbox(this.dataset.original)" data-original="' + url + '">';
+  var miniature = url.split('=')[0] + '=w200';
+  html += '<img class="avis-photo" src="' + miniature + '" alt="Photo ' + (i + 1) + '" loading="lazy" style="cursor:pointer" onclick="ouvrirLightbox(this.dataset.original)" data-original="' + url + '">';
 });
+
 
   html += '</div>';
 }
