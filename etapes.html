@@ -378,7 +378,7 @@ if (photos.length) {
     });
 function ouvrirLightbox(url) {
   var img = document.getElementById('lightbox-img');
-  img.src = url;
+  img.src = url.split('=')[0] + '=s1600';
   document.getElementById('lightbox').classList.add('active');
 }
 
