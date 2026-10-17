@@ -127,13 +127,17 @@
       margin-bottom: 20px;
     }
 
-    #journal { list-style: none; }
+    #journal {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
     .etape {
       background: var(--carte);
       border: 1px solid var(--trait);
       border-radius: 14px;
       padding: 16px 18px;
-      margin-bottom: 12px;
     }
     .etape.fait { border-color: var(--accent-trait); }
     .etape-entete {
