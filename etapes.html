@@ -410,6 +410,9 @@ html += '</div></div>';
     .then(function (d) {
       if (d.erreur) throw new Error(d.erreur);
       afficherJournal(d.etapes);
+      d.etapes.forEach(function(e) {
+        if (e.fait) loadComments(e.jour);
+      });
     })
     .catch(function (e) {
       var errEl = $('erreur');
