@@ -378,7 +378,7 @@
     return Number(n || 0).toLocaleString('fr-FR', { minimumFractionDigits: d !== undefined ? d : 1, maximumFractionDigits: d !== undefined ? d : 1 });
   };
   var fmt = function (n) { return Number(n || 0).toLocaleString('fr-FR'); };
-
+  var toutesEtapes = [];
   var SMILEYS = { '1': '😞', '2': '🙁', '3': '😐', '4': '🙂', '5': '😍' };
   function smileyPour(avis) {
     if (!avis) return '';
@@ -388,7 +388,7 @@
     return a;
   }
 
-  function afficherJournal(etapes) {
+  function afficherJournal(etapes, tout) {
     var ol = $('journal');
     ol.innerHTML = '';
     $('compteur-page').textContent = etapes.length + ' étapes au total';
@@ -453,7 +453,7 @@ html += '<div class="comments-bloc">';
       li.innerHTML = html;
       ol.appendChild(li);
     });
-   if (etapes.length > 6) {
+   if (!tout && etapes.length > 6) {
   var btnPlus = document.createElement('li');
   btnPlus.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;padding:8px 0;';
   btnPlus.innerHTML = '<button onclick="toutAfficher()" style="background:var(--carte);border:1px solid var(--trait);border-radius:10px;padding:10px 24px;color:var(--discret);font:500 13px var(--mono);cursor:pointer;letter-spacing:0.04em;">↓ Voir toutes les étapes</button>';
@@ -465,6 +465,7 @@ html += '<div class="comments-bloc">';
     .then(function (r) { return r.json(); })
     .then(function (d) {
       if (d.erreur) throw new Error(d.erreur);
+      toutesEtapes = d.etapes;
       afficherJournal(d.etapes);
       d.etapes.forEach(function(e) {
         if (e.fait) loadComments(e.jour);
@@ -517,12 +518,8 @@ function postComment(jour) {
     });
 }
 function toutAfficher() {
-  fetch(API + '?public=1')
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      afficherJournal(d.etapes);
-      d.etapes.forEach(function(e) { if (e.fait) loadComments(e.jour); });
-    });
+  afficherJournal(toutesEtapes, true);
+  toutesEtapes.forEach(function(e) { if (e.fait) loadComments(e.jour); });
 }
 </script>
 </body>
