@@ -339,7 +339,7 @@
       if (e.fait && e.note && (e.note.avis || e.note.commentaire || e.note.photo)) {
         html += '<div class="avis-bloc">';
         if (e.note.avis) {
-          html += '<div class="avis-smiley">' + smileyPour(e.note.avis) + '</div>';
+        html += '<div class="avis-smiley">' + smileyPour(e.note.avis) + '</div>';
         }
         html += '<div class="avis-texte">';
         if (e.note.commentaire) {
@@ -352,13 +352,17 @@ if (photos.length) {
   var miniature = url.split('=')[0] + '=w200';
   html += '<img class="avis-photo" src="' + miniature + '" alt="Photo ' + (i + 1) + '" loading="lazy" style="cursor:pointer" onclick="ouvrirLightbox(this.dataset.original)" data-original="' + url + '">';
 });
-
-
   html += '</div>';
 }
         html += '</div></div>';
       }
-
+html += '<div class="comments-bloc">';
+html += '<div class="comments-list" id="comments-' + e.jour + '"></div>';
+html += '<div class="comment-form">';
+html += '<input type="text" placeholder="Ton nom" id="nom-' + e.jour + '">';
+html += '<input type="text" placeholder="Ton commentaire" id="comment-' + e.jour + '">';
+html += '<button onclick="postComment(' + e.jour + ')">Envoyer</button>';
+html += '</div></div>';
       li.innerHTML = html;
       ol.appendChild(li);
     });
@@ -386,6 +390,28 @@ document.getElementById('lightbox').onclick = function() {
   this.classList.remove('active');
   document.getElementById('lightbox-img').src = '';
 };
+function postComment(jour) {
+  var nom = document.getElementById('nom-' + jour).value;
+  var comment = document.getElementById('comment-' + jour).value;
+  if (!nom || !comment) return;
+  fetch(API, {
+    method: 'POST',
+    body: JSON.stringify({ etape: jour, nom: nom, commentaire: comment })
+  }).then(function() {
+    loadComments(jour);
+  });
+}
+  function loadComments(jour) {
+  fetch(API + '?comments=' + jour)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var el = document.getElementById('comments-' + jour);
+      if (!el) return;
+      el.innerHTML = d.comments.map(function(c) {
+        return '<div class="comment"><strong>' + c.nom + '</strong> : ' + c.commentaire + '</div>';
+      }).join('');
+    });
+}
 </script>
 </body>
 </html>
