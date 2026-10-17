@@ -506,7 +506,7 @@ function postComment(jour) {
       var el = document.getElementById('comments-' + jour);
       if (!el) return;
       el.innerHTML = d.comments.map(function(c) {
-        return '<div class="comment"><strong>' + c.nom + '</strong> : ' + c.commentaire + '</div>';
+        return '<div class="comment"><strong>' + c.nom + '</strong> ' + c.commentaire + '</div>';
       }).join('');
     });
 }
