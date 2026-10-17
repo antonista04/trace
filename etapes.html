@@ -393,7 +393,7 @@
     ol.innerHTML = '';
     $('compteur-page').textContent = etapes.length + ' étapes au total';
 
-    etapes.forEach(function (e) {
+    etapes.slice(0, 6).forEach(function (e) {
       var li = document.createElement('li');
       var classe = 'etape';
       if (e.fait) classe += ' fait';
@@ -453,6 +453,12 @@ html += '<div class="comments-bloc">';
       li.innerHTML = html;
       ol.appendChild(li);
     });
+   if (etapes.length > 6) {
+  var btnPlus = document.createElement('li');
+  btnPlus.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;padding:8px 0;';
+  btnPlus.innerHTML = '<button onclick="toutAfficher()" style="background:var(--carte);border:1px solid var(--trait);border-radius:10px;padding:10px 24px;color:var(--discret);font:500 13px var(--mono);cursor:pointer;letter-spacing:0.04em;">↓ Voir toutes les étapes</button>';
+  ol.appendChild(btnPlus);
+} 
   }
 
   fetch(API + '?public=1')
@@ -508,6 +514,14 @@ function postComment(jour) {
       el.innerHTML = d.comments.map(function(c) {
         return '<div class="comment"><strong>' + c.nom + '</strong> ' + c.commentaire + '</div>';
       }).join('');
+    });
+}
+function toutAfficher() {
+  fetch(API + '?public=1')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      afficherJournal(d.etapes);
+      d.etapes.forEach(function(e) { if (e.fait) loadComments(e.jour); });
     });
 }
 </script>
