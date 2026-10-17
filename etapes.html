@@ -284,8 +284,29 @@
   padding: 6px 0;
   border-bottom: 1px solid var(--trait-subtil);
 }
-.comment strong { color: var(--papier); }  
-  </style>
+.comment strong { color: var(--papier); }
+
+.comments-inline {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.comments-inline .comments-list {
+  flex: 1;
+}
+.comments-more {
+  font: 500 13px var(--mono);
+  color: var(--discret);
+  text-decoration: none;
+  padding: 4px 8px;
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  white-space: nowrap;
+  align-self: center;
+}
+.comments-more:hover { color: var(--accent); border-color: var(--accent-trait); }
+
+</style>
 </head>
 <body>
 <main>
