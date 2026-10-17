@@ -185,7 +185,7 @@
     .avis-smiley { font-size: 28px; line-height: 1; flex-shrink: 0; }
     .avis-texte { flex: 1; min-width: 0; }
     .avis-commentaire { color: var(--papier); font-size: 14px; line-height: 1.5; }
-        .avis-photo {
+      .avis-photo {
       margin-top: 10px;
       max-width: 100%;
       border-radius: 10px;
@@ -193,14 +193,14 @@
       display: block;
     }
     .galerie-photos {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
 }
 .galerie-photos .avis-photo {
-  width: 50px;
-  height: 50px;
+  width: 100%;
+  height: 60px;
   object-fit: cover;
   border-radius: 8px;
   cursor: pointer;
