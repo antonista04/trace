@@ -435,7 +435,15 @@ function postComment(jour) {
     method: 'POST',
     body: JSON.stringify({ etape: jour, nom: nom, commentaire: comment })
   }).then(function() {
+    document.getElementById('nom-' + jour).value = '';
+    document.getElementById('comment-' + jour).value = '';
     loadComments(jour);
+    var btn = document.querySelector('#comments-' + jour + ' ~ .comment-form button') || document.evaluate("//button[@onclick='postComment(" + jour + ")']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    var notif = document.createElement('div');
+    notif.textContent = '✓ Commentaire envoyé !';
+    notif.style.cssText = 'color:var(--accent);font:12px var(--mono);margin-top:6px;';
+    btn.parentNode.appendChild(notif);
+    setTimeout(function() { notif.remove(); }, 3000);
   });
 }
   function loadComments(jour) {
