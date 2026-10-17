@@ -252,6 +252,13 @@
   display: flex;
   gap: 8px;
   margin-top: 8px;
+  max-width: 500px;
+}
+.comment-form input[placeholder="Ton nom"] {
+  max-width: 120px;
+}
+.comments-list {
+  max-width: 500px;
 }
 .comment-form input {
   flex: 1;
@@ -395,7 +402,7 @@ if (e.fait) {
 html += '<div class="comments-bloc">';
 html += '<div class="comments-list" id="comments-' + e.jour + '"></div>';
 html += '<div class="comment-form">';
-html += '<input type="text" placeholder="Ton nom" id="nom-' + e.jour + '">';
+html += '<input type="text" placeholder="Ton nom" id="nom-' + e.jour + '" maxlength="30">';
 html += '<input type="text" placeholder="Ton commentaire" id="comment-' + e.jour + '">';
 html += '<button onclick="postComment(' + e.jour + ')">Envoyer</button>';
 html += '</div></div>';
