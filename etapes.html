@@ -356,6 +356,7 @@ if (photos.length) {
 }
         html += '</div></div>';
       }
+if (e.fait) {
 html += '<div class="comments-bloc">';
 html += '<div class="comments-list" id="comments-' + e.jour + '"></div>';
 html += '<div class="comment-form">';
@@ -363,6 +364,7 @@ html += '<input type="text" placeholder="Ton nom" id="nom-' + e.jour + '">';
 html += '<input type="text" placeholder="Ton commentaire" id="comment-' + e.jour + '">';
 html += '<button onclick="postComment(' + e.jour + ')">Envoyer</button>';
 html += '</div></div>';
+}
       li.innerHTML = html;
       ol.appendChild(li);
     });
