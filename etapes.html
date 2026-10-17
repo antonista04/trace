@@ -417,10 +417,8 @@ if (photos.length) {
 });
   html += '</div>';
 }
-        html += '</div></div>';
-      }
-if (e.fait) {
-html += '<div class="comments-bloc">';
+                if (e.fait) {
+html += '<div class="comments-side">';
 html += '<div class="comments-inline">';
 html += '<div class="comments-list" id="comments-' + e.jour + '"></div>';
 html += '<a class="comments-more" href="#">···</a>';
@@ -430,6 +428,11 @@ html += '<input type="text" placeholder="Ton nom" id="nom-' + e.jour + '" maxlen
 html += '<input type="text" placeholder="Ton commentaire" id="comment-' + e.jour + '">';
 html += '<button onclick="postComment(' + e.jour + ')">Envoyer</button>';
 html += '</div></div>';
+}
+        html += '</div></div>';
+      }
+if (false) {
+html += '<div class="comments-bloc">';
 }
       li.innerHTML = html;
       ol.appendChild(li);
