@@ -393,7 +393,7 @@
     ol.innerHTML = '';
     $('compteur-page').textContent = etapes.length + ' étapes au total';
 
-    etapes.slice(0, 6).forEach(function (e) {
+    (tout ? etapes : etapes.slice(0, 6)).forEach(function (e) {
       var li = document.createElement('li');
       var classe = 'etape';
       if (e.fait) classe += ' fait';
